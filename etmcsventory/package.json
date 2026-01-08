@@ -1,0 +1,61 @@
+{
+  "name": "etmcsventory",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^13.5.0",
+	  "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^6.1.2",
+    "@mui/styled-engine-sc": "^6.1.2",
+    "@shadcn/ui": "^0.0.4",
+    "web-vitals": "^2.1.4",
+    "axios": "^1.7.9",
+    "cra-template": "1.2.0",
+    "dotenv": "^16.4.7",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
+    "lucide": "^0.469.0",
+    "markdown-to-jsx": "^7.7.2",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-scripts": "5.0.1",
+    "react-content-loader": "^7.0.2",
+    "react-data-table-component": "^7.6.2",
+    "react-icons": "^5.4.0",
+    "react-player": "^3.4.0",
+    "react-router-dom": "^7.1.1",
+    "react-to-print": "^3.1.1",
+    "react-toastify": "^11.0.5",
+    "recharts": "^2.15.0",
+    "styled-components": "^6.1.13",
+    "xlsx": "^0.18.5"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts --max_old_space_size=4096 build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
