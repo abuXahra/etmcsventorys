@@ -13,17 +13,42 @@ import Overlay from '../../overlay/Overlay';
 import axios from 'axios';
 import { ActionButton, ActionButtons, Container, SlideUpButton, TableWrapper } from '../expense_table/Expense.style';
 import Button from '../../clicks/button/Button';
+import { AnyItemContainer, InnerWrapper } from '../../../pages/sale/Add/addSale.style';
+import { useEffect } from 'react';
 
 
-const AuditLogTable = ({data, onDeleteAudit, auditPer1mission}) => {
+const AuditLogTable = ({data, onDeleteAudit, auditPermission}) => {
   const token = localStorage.getItem('token');
     
+  console.log('audit data: \n', data)
+
   const navigate = useNavigate();
 
   const [showDeleteCard, setShowDeleteCard] = useState(false);
   const [grabId, setGrabId] = useState('');
   const [grabAuditTitle, setGrabAuditTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showDetailCard, setShowDetailCard] = useState(false);
+
+  const [activity, setActivity] = useState('')
+  const [module, setModule] = useState('')
+  const [username, setUsername] = useState('')
+  const [date, setDate] = useState('')
+  const [docId, setDocId] = useState('')
+  const [showView, setShowView] = useState(true);
+
+ 
+
+  const handleActivityDetail = (_id, docId, userame, title, module, desc, date) =>{
+    setShowDetailCard(true)
+    setGrabId(_id)
+    setDocId(docId)
+    setUsername(userame)
+    setModule(module)
+    setActivity(desc)
+    setDate(date)
+    setGrabAuditTitle(title)
+  }
   
 
 
@@ -35,13 +60,24 @@ const AuditLogTable = ({data, onDeleteAudit, auditPer1mission}) => {
       }
   
 
+    // const handleDelete = (auditId, auditTitle)=>{
+    //       setShowDeleteCard(true);
+    //       setGrabId(auditId);
+    //       setGrabAuditTitle(auditTitle);
+      
+    //   }
+  
+
+
       const handleDelete = async (auditId) => {
+ 
               setIsLoading(true);
               try {
                 const response = await onDeleteAudit(auditId); // call parent function
             
                 if (response.success) {
                   toast.success('Audit Log deleted successfully');
+                  setShowDetailCard(false); // Close modal
                   setShowDeleteCard(false); // Close modal
                 } else {
                   toast.error('Error deleting message: ' + response.message);
@@ -71,7 +107,7 @@ const AuditLogTable = ({data, onDeleteAudit, auditPer1mission}) => {
             const confirmBulkDelete = async () => {
               setIsDeleting(true);
               try {
-                await axios.delete(`${process.env.REACT_APP_URL}/api/customers/bulk-delete`, {
+                await axios.delete(`${process.env.REACT_APP_URL}/api/activity/bulk-delete`, {
                 data: { ids: selectedAuditLog.map((e) => e._id) },
                 headers: {Authorization: `Bearer ${token}`}
             });
@@ -93,46 +129,62 @@ const AuditLogTable = ({data, onDeleteAudit, auditPer1mission}) => {
                   }
                 };
 
+          const auditDate = (auditDateItem) => {
+            const date = new Date(auditDateItem);
+            const parts = date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            }).split(' ');
+            parts[0] = parts[0].replace(/([A-Za-z]+)/, '$1.'); // Add period
+            return parts.join(' ');
+        }
 
                 
   const columns = [
 
+        {
+        name: 'Date',
+        width: '12%',
+        sortable: true,
+        selector: (row) => {
+            const date = new Date(row.createdAt);
+            const parts = date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            }).split(' ');
+            parts[0] = parts[0].replace(/([A-Za-z]+)/, '$1.'); // Add period
+            return parts.join(' ');
+        },
+        },
+
     {
-       name: 'Date',
-       width: '15%',
-       selector: (row) => {
-         const date = new Date(row.createdAt);
-         return date.toLocaleDateString('en-US', {
-           year: 'numeric',
-           month: 'long',
-           day: 'numeric',
-         });
-       },
-     },
-    {
-        name: 'Action',
+        name: 'Username',
         selector: (row) => row.username,
         sortable: true,
-        width: '100px', // Set a different width
+         width: '20%',
       },
+
       
       {
         name: 'Module',
         selector: (row) => row.module,
         sortable: true,
-        width: '100px', // Set a different width
+        width: '10%', // Set a different width
       },
-    {
-        name: 'Action',
-        selector: (row) => row.action,
-        sortable: true,
-        width: '100px', // Set a different width
-      },
+    // {
+    //     name: 'Action',
+    //     selector: (row) => row.action,
+    //     sortable: true,
+    //     width: '10%', // Set a different width
+    //   },
         
     {
-      name: 'Description',
+      name: 'Activity',
       selector: (row) => row.description,
       sortable: true,
+      width: '35%',
     },
     
     {
@@ -142,12 +194,15 @@ const AuditLogTable = ({data, onDeleteAudit, auditPer1mission}) => {
         {/* {auditPermission?.canEdit &&   <ActionButton clr='green' onClick={() => navigate(`/edit-customer/${row._id}`)}><FaEdit/> Edit</ActionButton>}
            {auditPermission?.canView && <ActionButton clr="blue" onClick={() => navigate(`/customers/${row._id}`)}><FaEye/> View</ActionButton>}
           {auditPermission?.canDelete && <ActionButton clr="red" onClick={() =>  handleGrabId(row._id, row.name)}><FaTrash/> Delete</ActionButton>}*/}
-           { <ActionButton clr="blue" onClick={() => navigate(`/customers/${row.documentId}`)}><FaEye/> View</ActionButton>}
-          {  <ActionButton clr="red" onClick={() =>  handleGrabId(row._id, row.name)}><FaTrash/> Delete</ActionButton>}
+            {  <ActionButton clr="red" onClick={() =>  handleGrabId(row?._id, row.newData.title)}><FaTrash/> Delete</ActionButton>}
+           {row.action !== 'DELETE' && <ActionButton clr="blue" onClick={() => handleActivityDetail(row._id, row.documentId, row.username, row.newData.title, row.module, row.description, row.createdAt)}><FaEye/> View</ActionButton>}
+
         </ActionButtons>
       ),
     },
   ];
+
+  // () => navigate(`/customers/${row.documentId}`)}
 
   return (
     <Container>
@@ -182,6 +237,60 @@ const AuditLogTable = ({data, onDeleteAudit, auditPer1mission}) => {
             </Button>
           </SlideUpButton>
         )}
+
+
+        {/* modal to view acivity detail*/}
+             {showDetailCard &&
+              <Overlay 
+                contentWidth={'50%'}
+                overlayButtonClick={()=>navigate(`/category-detail/${docId}`)}
+                closeOverlayOnClick={()=>setShowDetailCard(false)}
+                alternatFunc={()=>handleDelete(grabId)}
+                btnText1={'View Detail'}
+                btnText2={isLoading ? <ButtonLoader text={'Deleting...'}/> : 'Delete Log'}
+                >
+
+                  <h3>Audit Detail</h3>
+                  
+  {/* docId */}
+                <AnyItemContainer>
+                       <InnerWrapper wd={'100%'}>
+                          <span><b>Module</b></span>
+                          <span>{module}</span>
+                       </InnerWrapper>
+                  </AnyItemContainer> 
+                  <AnyItemContainer>
+                       <InnerWrapper wd={'100%'}>
+                          <span><b>Username</b></span>
+                          <span>{username}</span>
+                       </InnerWrapper>
+                  </AnyItemContainer> 
+
+                  <AnyItemContainer>
+                       <InnerWrapper wd={'100%'}>
+                          <span><b>Title</b></span>
+                          <span>{grabAuditTitle}</span>
+                       </InnerWrapper>
+                  </AnyItemContainer> 
+
+                  
+                  <AnyItemContainer>
+                       <InnerWrapper wd={'100%'}>
+                          <span><b>Description</b></span>
+                          <span>{activity}</span>
+                       </InnerWrapper>
+                  </AnyItemContainer>
+
+
+                <AnyItemContainer>
+                       <InnerWrapper wd={'100%'}>
+                          <span><b>Date</b></span>
+                          <span>{auditDate(date)}</span>
+                       </InnerWrapper>
+                  </AnyItemContainer>
+              </Overlay>
+            }
+
 
 
       {/* modal to delete single items */}

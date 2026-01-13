@@ -8,7 +8,6 @@ exports.createCategory = async (req, res) => {
     const { title, status, note, imgUrl, prefix } = req.body;
 
     const user = req.user; // comes from verifyToken
-    console.log("user: ===", user);
 
     // Find last category with same prefix
     const lastCategory = await Category.findOne({
@@ -46,20 +45,18 @@ exports.createCategory = async (req, res) => {
     const savedCategory = await newCategory.save();
 
     // Activity log
-    const activity = await logActivity({
+    await logActivity({
       user,
-      action: "CREATE",
+      action: "ADD",
       module: "Category",
       documentId: savedCategory._id,
-      description: `Created category "${savedCategory.title}"`,
+      description: `Added category "${savedCategory.title}"`,
       newData: {
         title: savedCategory.title,
         code: savedCategory.code,
         status: savedCategory.status,
       },
     });
-
-    console.log("🧾 Activity saved:", activity?._id);
 
     res.status(201).json({
       message: "Category created successfully",
@@ -210,12 +207,28 @@ exports.getCategoryWithProducts = async (req, res) => {
 
 //Update category
 exports.categoryUpdate = async (req, res) => {
+  const user = req.user; // comes from verifyToken
   try {
     const updatedCategory = await Category.findByIdAndUpdate(
       req.params.categoryId,
       { $set: req.body },
       { new: true }
     );
+
+    // Activity log
+    await logActivity({
+      user,
+      action: "UPDATE",
+      module: "Category",
+      documentId: updatedCategory._id,
+      description: `Updated category "${updatedCategory.title}"`,
+      newData: {
+        title: updatedCategory.title,
+        code: updatedCategory.code,
+        status: updatedCategory.status,
+      },
+    });
+
     res.status(200).json(updatedCategory);
   } catch (err) {
     res.status(500).json(err);
@@ -224,11 +237,27 @@ exports.categoryUpdate = async (req, res) => {
 
 // delete category
 exports.deleteCategory = async (req, res) => {
+  const user = req.user; // comes from verifyToken
+
   try {
     const categoryId = req.params.categoryId;
 
     // Find user and delete it
     const category = await Category.findByIdAndDelete(categoryId);
+
+    // Activity log
+    await logActivity({
+      user,
+      action: "DELETE",
+      module: "Category",
+      documentId: category._id,
+      description: `Deleted category "${category.title}"`,
+      newData: {
+        title: category.title,
+        code: category.code,
+        status: category.status,
+      },
+    });
 
     return res
       .status(200)

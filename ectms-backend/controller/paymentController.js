@@ -13,6 +13,7 @@ exports.registerPayment = async (req, res) => {
       note,
       userId,
     } = req.body;
+    const user = req.user; // comes from verifyToken
 
     if (!paymentFor || !payableAmount || !paymentType || !paymentDate) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -85,6 +86,21 @@ exports.registerPayment = async (req, res) => {
     });
 
     await newPayment.save();
+
+    // Activity log
+    await logActivity({
+      user,
+      action: "ADD",
+      module: "Payment",
+      documentId: newPayment._id,
+      description: `Add a payment for the invoice "${newPayment.paymentFor}"`,
+      newData: {
+        title: newPayment.paymentFor,
+        code: newPayment.code,
+        status: "",
+      },
+    });
+
     res
       .status(201)
       .json({ message: "Payment recorded successfully", payment: newPayment });
@@ -195,6 +211,8 @@ exports.updatePayment = async (req, res) => {
       userId,
     } = req.body;
 
+    const user = req.user; // comes from verifyToken
+
     const payment = await Payment.findById(paymentId);
     if (!payment) return res.status(404).json({ message: "Payment not found" });
 
@@ -270,6 +288,20 @@ exports.updatePayment = async (req, res) => {
 
     await payment.save();
 
+    // Activity log
+    await logActivity({
+      user,
+      action: "UPDATE",
+      module: "Payment",
+      documentId: payment._id,
+      description: `Updated a payment for the invoice "${payment.paymentFor}"`,
+      newData: {
+        title: payment.paymentFor,
+        code: payment.code,
+        status: "",
+      },
+    });
+
     res.status(200).json({
       message: "Payment updated successfully",
       payment,
@@ -284,8 +316,10 @@ exports.updatePayment = async (req, res) => {
 exports.deletePayment = async (req, res) => {
   try {
     const paymentId = req.params.paymentId;
+    const user = req.user; // comes from verifyToken
 
     const payment = await Payment.findById(paymentId);
+
     if (!payment) return res.status(404).json({ message: "Payment not found" });
 
     const { paymentFor, payableAmount } = payment;
@@ -339,7 +373,21 @@ exports.deletePayment = async (req, res) => {
     }
 
     // Delete the payment after rollback
-    await Payment.findByIdAndDelete(paymentId);
+    const paymentB = await Payment.findByIdAndDelete(paymentId);
+
+    // Activity log
+    await logActivity({
+      user,
+      action: "DELETE",
+      module: "Payment",
+      documentId: paymentB._id,
+      description: `Updated a payment for the invoice "${paymentB.paymentFor}"`,
+      newData: {
+        title: paymentB.paymentFor,
+        code: paymentB.code,
+        status: "",
+      },
+    });
 
     res
       .status(200)
@@ -352,6 +400,7 @@ exports.deletePayment = async (req, res) => {
 
 exports.bulkDeletePayment = async (req, res) => {
   try {
+    const user = req.user; // comes from verifyToken
     const { ids } = req.body;
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {

@@ -33,7 +33,7 @@ const port = process.env.PORT || 5000;
 
 const corsOptions = {
   origin: [
-    "https://inventory.jewelszenithgalore.com.ng",
+    "https://etmcsventorys.onrender.com",
     "https://inventory-management-system-xcvp.onrender.com",
     "http://localhost:3000",
     "http://localhost:3001",

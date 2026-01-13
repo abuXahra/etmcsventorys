@@ -51,7 +51,7 @@ export const SidebarDropdown = styled.div`
     color: black;
     display: flex;
     flex-direction: column;
-    margin-top: -30px;
+    margin-top: -100px;
 
     @media (max-width: 768px) {
         right: -170px;

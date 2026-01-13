@@ -1,4 +1,5 @@
 const Customer = require("../models/Customer");
+const logActivity = require("../utils/activityLogger");
 
 // register customer
 exports.createCustomer = async (req, res) => {
@@ -15,7 +16,7 @@ exports.createCustomer = async (req, res) => {
       prefix,
       userId,
     } = req.body;
-
+    const user = req.user; // comes from verifyToken
     // Find the last customer with the same prefix
     const lastCustomer = await Customer.findOne({
       code: { $regex: `^${prefix}` },
@@ -59,6 +60,21 @@ exports.createCustomer = async (req, res) => {
     });
 
     const savedCustomer = await newCustomer.save();
+
+    // Activity log
+    await logActivity({
+      user,
+      action: "ADD",
+      module: "Customer",
+      documentId: savedCustomer._id,
+      description: `Registered a customer "${savedCustomer.name}"`,
+      newData: {
+        title: savedCustomer.name,
+        code: savedCustomer.code,
+        status: "",
+      },
+    });
+
     res.status(200).json({
       message: "Customer saved successfully",
       savedCustomer,
@@ -93,7 +109,7 @@ exports.fetchCustomer = async (req, res) => {
 exports.updateCustomer = async (req, res) => {
   try {
     const customerId = req.params.customerId;
-
+    const user = req.user; // comes from verifyToken
     const customer = await Customer.findById(customerId);
 
     if (!customer) {
@@ -105,6 +121,21 @@ exports.updateCustomer = async (req, res) => {
       { $set: req.body },
       { new: true }
     );
+
+    // Activity log
+    await logActivity({
+      user,
+      action: "UPDATE",
+      module: "Customer",
+      documentId: customerUpdate._id,
+      description: `Updated a customer "${customerUpdate.name}"`,
+      newData: {
+        title: customerUpdate.name,
+        code: customerUpdate.code,
+        status: "",
+      },
+    });
+
     res.status(200).json(customerUpdate);
   } catch (err) {
     res.status(500).json(err);
@@ -115,9 +146,22 @@ exports.updateCustomer = async (req, res) => {
 exports.customerDelete = async (req, res) => {
   try {
     const customerId = req.params.customerId;
-
+    const user = req.user; // comes from verifyToken
     // Find customer and delete it
     const customer = await Customer.findByIdAndDelete(customerId);
+
+    await logActivity({
+      user,
+      action: "DELETE",
+      module: "Customer",
+      documentId: customer._id,
+      description: `Deleted a customer "${customer.name}"`,
+      newData: {
+        title: customer.name,
+        code: customer.code,
+        status: "",
+      },
+    });
 
     return res
       .status(200)
@@ -131,6 +175,7 @@ exports.customerDelete = async (req, res) => {
 // BULK DELETE Customers
 exports.bulkDeleteCustomers = async (req, res) => {
   try {
+    const user = req.user; // comes from verifyToken
     const { ids } = req.body; // expects an array of _id values
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
@@ -139,7 +184,35 @@ exports.bulkDeleteCustomers = async (req, res) => {
         .json({ success: false, message: "No customer IDs provided." });
     }
 
+    // 1️⃣ Fetch customers before deletion (for logging)
+    const customers = await Customer.find({ _id: { $in: ids } });
+
+    if (customers.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No customers found.",
+      });
+    }
+
     const result = await Customer.deleteMany({ _id: { $in: ids } });
+
+    // 3️⃣ Log activity per customer
+    await Promise.all(
+      customers.map((customer) =>
+        logActivity({
+          user,
+          action: "DELETE",
+          module: "Customer",
+          documentId: customer._id,
+          description: `Deleted customer "${customer.name}" (bulk delete)`,
+          oldData: {
+            title: customer.name,
+            code: customer.code,
+            status: "",
+          },
+        })
+      )
+    );
 
     res.status(200).json({
       success: true,

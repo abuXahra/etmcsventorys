@@ -98,6 +98,11 @@ export const SidebarItemLists = [
         icon: <IoMicOffCircle />,
       },
       {
+        title: "Audit Log",
+        url: "/audit-log",
+        icon: <IoMicOffCircle />,
+      },
+      {
         title: "User",
         url: "/users",
         icon: <FaUsers />,

@@ -116,7 +116,7 @@ const navigate = useNavigate();
             {/* Activity Table */}
             <AuditLogTable 
               data={activityLog} 
-              onDeleteCus={deleteAudit} 
+              onDeleteAudit={deleteAudit} 
             //   customerPermission={effectivePermission} 
             />
          </AuditLogContent>
