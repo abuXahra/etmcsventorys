@@ -431,7 +431,7 @@ export default function SupplierDetail() {
 
             <SupplierDetailPicture>
               <ItemContainer title={'Profile Picture'}> 
-                <PictureWrapper imgUrl={supData?.imgUrl ? `${process.env.REACT_APP_URL}/images/${supData?.imgUrl}` : profilePicture}></PictureWrapper>      
+                <PictureWrapper imgUrl={supData?.imgUrl ? `${process.env.REACT_APP_URL}/images/${encodeURIComponent(supData?.imgUrl)}` : profilePicture}></PictureWrapper>      
               </ItemContainer>
 
               <ItemContainer title={'Action'}> 

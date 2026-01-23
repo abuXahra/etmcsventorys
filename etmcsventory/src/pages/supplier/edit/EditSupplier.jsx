@@ -11,7 +11,7 @@ import { AnyItemContainer } from '../../sale/Add/addSale.style'
 import { FaLocationDot } from 'react-icons/fa6'
 import ButtonLoader from '../../../components/clicks/button/button_loader/ButtonLoader'
 import { AiFillPicture } from 'react-icons/ai'
-import profilPiture from '../../../images/placeholder_image.png'
+import profilePiture from '../../../images/placeholder_image.png'
 import { EditSupplierContent, EditSupplierWrapper, ImageWrapper, InputPicture, NameAndFileInput } from './editSupplier.style'
 import { UserContext } from '../../../components/context/UserContext'
 import axios from 'axios'
@@ -243,7 +243,7 @@ const token = localStorage.getItem('token');
                         <NameAndFileInput>
                             <label htmlFor="fileInput">
                             <span>Picture</span> 
-                            {showPicture ? (  <ImageWrapper bg={file ? `${process.env.REACT_APP_URL}/images/${file}` : profilPiture}>
+                            {showPicture ? (  <ImageWrapper bg={file ? `${process.env.REACT_APP_URL}/images/${encodeURIComponent(file)}` : profilePiture}>
                                         {/* {file && <img src={URL.createObjectURL(file)} alt="" srcset="" />} */}
                                 </ImageWrapper>) :      
                          (<>  { 

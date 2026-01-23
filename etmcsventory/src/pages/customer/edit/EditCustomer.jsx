@@ -285,7 +285,7 @@ export default function EditCustomer() {
                             <label htmlFor="fileInput">
                             <span>Picture</span> 
                             {showPicture ? 
-                            (  <ImageWrapper bg={file ? `${process.env.REACT_APP_URL}/images/${file}` : profilPiture}>
+                            (  <ImageWrapper bg={file ? `${process.env.REACT_APP_URL}/images/${encodeURIComponent(file)}` : profilPiture}>
                                         {/* {file && <img src={URL.createObjectURL(file)} alt="" srcset="" />} */}
                                 </ImageWrapper>) :      
                          (<>  { 

@@ -227,7 +227,7 @@ export default function EditCategory() {
                             <label htmlFor="fileInput">
                             <span>Picture</span> 
                             {showPicture
-                             ? (  <ImageWrapper bg={file ? `${process.env.REACT_APP_URL}/images/${file}` : catPicture}>
+                             ? (  <ImageWrapper bg={file ? `${process.env.REACT_APP_URL}/images/${encodeURIComponent(file)}` : catPicture}>
                                         {/* {file && <img src={URL.createObjectURL(file)} alt="" srcset="" />} */}
                                 </ImageWrapper>) :      
                          (<>  { 

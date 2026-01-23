@@ -86,7 +86,10 @@ export default function AddProduct() {
                           } );
                        
                         console.log(res.data);
-                        const formattedSaleDate = new Date(res.data.expirationDate).toISOString().split('T')[0]
+                        // const formattedSaleDate = new Date(res.data.expirationDate).toISOString().split('T')[0]
+                        const formattedSaleDate = res.data.expirationDate
+                            ? new Date(res.data.expirationDate).toISOString().split('T')[0]
+                            : '';
                         setTitle(res.data.title);
                         setVideoUrl(res.data.videoUrl);
                         setCategory(res.data.category?._id);
@@ -451,7 +454,7 @@ export default function AddProduct() {
                         <NameAndFileInput>
                             <label htmlFor="fileInput">
                             <span>Picture</span> 
-                            {showPicture ? (  <ImageWrapper bg={file ? `${process.env.REACT_APP_URL}/images/${file}` : productPicture}>
+                            {showPicture ? (  <ImageWrapper bg={file ? `${process.env.REACT_APP_URL}/images/${encodeURIComponent(file)}` : productPicture}>
                                         {/* {file && <img src={URL.createObjectURL(file)} alt="" srcset="" />} */}
                                 </ImageWrapper>) :      
                          (<>  { 

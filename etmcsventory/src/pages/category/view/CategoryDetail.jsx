@@ -192,7 +192,7 @@ const handleGrabId = (title)=>{
               
               <CategoryDetailPicture>
               <ItemContainer title={'Category Picture'}> 
-                 <PictureWrapper imgUrl={catData?.imgUrl ? `${process.env.REACT_APP_URL}/images/${catData?.imgUrl}` : catPicture}></PictureWrapper>               
+                 <PictureWrapper imgUrl={catData?.imgUrl ? `${process.env.REACT_APP_URL}/images/${encodeURIComponent(catData?.imgUrl)}` : catPicture}></PictureWrapper>               
                 {/* <img src={catPicture} alt="" srcset="" /> */}
               </ItemContainer>
             </CategoryDetailPicture>

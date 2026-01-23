@@ -440,7 +440,7 @@ const paymentTypeItems =  [
 
             <CustomerDetailPicture>
               <ItemContainer title={'Picture'}> 
-                <PictureWrapper imgUrl={cusData?.imgUrl ? `${process.env.REACT_APP_URL}/images/${cusData?.imgUrl}` : profilePicture}></PictureWrapper>        
+                <PictureWrapper imgUrl={cusData?.imgUrl ? `${process.env.REACT_APP_URL}/images/${encodeURIComponent(cusData?.imgUrl)}` : profilePicture}></PictureWrapper>        
                 {/* <img src={profilePicture} alt="" srcset="" /> */}
               </ItemContainer>
 
