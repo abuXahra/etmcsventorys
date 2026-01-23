@@ -28,8 +28,8 @@ const UserSchema = new mongoose.Schema(
     role: {
       type: String,
       require: true,
-      enum: ["admin", "user"],
-      default: "user",
+      enum: ["super-admin", "admin", "user"],
+      default: "super-admin",
     },
 
     address: {
@@ -46,7 +46,7 @@ const UserSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("User", UserSchema);

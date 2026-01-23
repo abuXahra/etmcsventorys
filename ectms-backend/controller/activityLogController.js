@@ -35,20 +35,12 @@ const MODULE_MODELS = {
   Unit,
   User,
   Wastage,
+  ActivityLog,
 };
 
 exports.getActivityLogs = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 20,
-      action,
-      module,
-      user,
-      startDate,
-      endDate,
-      documentId,
-    } = req.query;
+    const { action, module, user, startDate, endDate, documentId } = req.query;
 
     const filter = {};
     if (action) filter.action = action;
@@ -64,9 +56,9 @@ exports.getActivityLogs = async (req, res) => {
 
     let logs = await ActivityLog.find(filter)
       .populate("user", "username email role")
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
+      .sort({ createdAt: -1 });
+    // .skip((page - 1) * limit)
+    // .limit(Number(limit));
 
     // Dynamically populate document data based on module
     logs = await Promise.all(
@@ -77,18 +69,18 @@ exports.getActivityLogs = async (req, res) => {
           return { ...log.toObject(), document };
         }
         return log.toObject();
-      })
+      }),
     );
 
     const total = await ActivityLog.countDocuments(filter);
 
     res.json({
       data: logs,
-      pagination: {
-        total,
-        page: Number(page),
-        pages: Math.ceil(total / limit),
-      },
+      // pagination: {
+      //   total,
+      //   page: Number(page),
+      //   pages: Math.ceil(total / limit),
+      // },
     });
   } catch (error) {
     console.error("Get activity logs error:", error);

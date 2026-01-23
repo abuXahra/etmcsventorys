@@ -3,9 +3,210 @@ const Sale = require("../models/Sale");
 const SalesReturn = require("../models/SaleReturn");
 const Product = require("../models/Product");
 const Payment = require("../models/Payment");
+const logActivity = require("../utils/activityLogger");
 
-// register sale data
 exports.saleRegister = async (req, res) => {
+  try {
+    const {
+      saleDate,
+      customer,
+      saleStatus,
+      walkingCustomerEmail,
+      walkingCustomerNumber,
+      saleAmount,
+      paymentType,
+      paymentStatus,
+      amountPaid,
+      dueBalance,
+      note,
+      subTotal,
+      otherCharges,
+      discount,
+      discountValue,
+      shipping,
+      saleItems = [],
+      prefix,
+      userId,
+    } = req.body;
+
+    // Prevent saving sale with no items
+    if (!saleItems || saleItems.length === 0) {
+      return res.status(400).json({
+        message: "Sale items cannot be empty.",
+      });
+    }
+
+    // ================================
+    // 1. GENERATE SALE CODE
+    // ================================
+    const lastSale = await Sale.findOne({
+      code: { $regex: `^${prefix}` },
+    })
+      .sort({ code: -1 })
+      .exec();
+
+    let lastSerial = 0;
+    if (lastSale && lastSale.code) {
+      const match = lastSale.code.match(/\d+$/);
+      if (match) lastSerial = parseInt(match[0], 10);
+    }
+
+    const serial = (lastSerial + 1).toString().padStart(4, "0");
+    const code = `${prefix}${serial}`;
+
+    // ================================
+    // FORMAT ITEMS
+    // ================================
+    const cleanedItems = saleItems.map((item) => ({
+      productId: item.productId,
+      title: item.title,
+      quantity: Number(item.quantity),
+      price: Number(item.price),
+      tax: Number(item.tax),
+      taxAmount: Number(item.taxAmount),
+      unitCost: Number(item.unitCost),
+      amount: Number(item.amount),
+    }));
+
+    // ================================
+    // 2. CHECK STOCK FOR ALL PRODUCTS
+    // ================================
+    for (const item of cleanedItems) {
+      const product = await Product.findById(item.productId);
+
+      if (!product) {
+        return res.status(400).json({
+          message: `Product not found: ${item.title}`,
+        });
+      }
+
+      if (product.stockQuantity < item.quantity) {
+        return res.status(400).json({
+          message: `Not enough stock for product: ${item.title}`,
+        });
+      }
+    }
+
+    // ================================
+    // 3. CREATE THE SALE
+    // ================================
+    const newSale = new Sale({
+      code,
+      saleDate,
+      customer,
+      saleStatus,
+      walkingCustomerEmail,
+      walkingCustomerNumber,
+      saleAmount,
+      paymentType,
+      paymentStatus,
+      amountPaid,
+      dueBalance,
+      note,
+      subTotal,
+      otherCharges,
+      discount,
+      discountValue,
+      shipping,
+      userId,
+      saleItems: cleanedItems,
+    });
+
+    // ================================
+    // PAYMENT LOGIC
+    // ================================
+    if (paymentStatus === "unpaid") {
+      newSale.amountPaid = 0;
+      newSale.dueBalance = newSale.saleAmount;
+    } else if (paymentStatus === "paid") {
+      newSale.amountPaid = newSale.saleAmount;
+      newSale.dueBalance = 0;
+    } else if (paymentStatus === "partial") {
+      if (!amountPaid || amountPaid <= 0) {
+        newSale.amountPaid = 0;
+        newSale.dueBalance = newSale.saleAmount;
+      } else {
+        newSale.dueBalance = newSale.saleAmount - newSale.amountPaid;
+      }
+    }
+
+    await newSale.save();
+
+    // ================================
+    // 📝 ACTIVITY LOG (SALE CREATED)
+    // ================================
+    await logActivity({
+      user: req.user,
+      action: "ADD",
+      module: "Sale",
+      documentId: newSale._id,
+      description: `Added a sale (${newSale.code})`,
+      oldData: null,
+      newData: {
+        title: newSale.code,
+        code: newSale.code,
+        status: "",
+      },
+    });
+
+    // ================================
+    // 4. SAVE PAYMENT RECORD IF NEEDED
+    // ================================
+    if (paymentStatus === "paid" || paymentStatus === "partial") {
+      await Payment.create({
+        paymentDate: saleDate,
+        paymentFor: code,
+        invoiceNo: code,
+        dueBalance: newSale.dueBalance,
+        payableAmount: newSale.amountPaid,
+        paymentType,
+        note,
+        userId,
+      });
+    }
+
+    // ================================
+    // 5. ATOMIC STOCK UPDATE PER ITEM
+    // ================================
+    for (const item of cleanedItems) {
+      const update = await Product.findOneAndUpdate(
+        {
+          _id: item.productId,
+          stockQuantity: { $gte: item.quantity },
+        },
+        {
+          $inc: {
+            saleQuantity: item.quantity,
+            stockQuantity: -item.quantity,
+          },
+        },
+        { new: true }
+      );
+
+      if (!update) {
+        return res.status(400).json({
+          message: `Not enough stock for product: ${item.title}`,
+        });
+      }
+    }
+
+    // ================================
+    // SUCCESS
+    // ================================
+    res.status(200).json({
+      message: "Sale saved successfully",
+      sale: newSale,
+    });
+  } catch (error) {
+    console.error("Sale Register Error:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+exports.saleRegister1 = async (req, res) => {
   try {
     const {
       saleDate,
@@ -168,7 +369,6 @@ exports.saleRegister = async (req, res) => {
         });
       }
     }
-
     // ================================
     // SUCCESS
     // ================================
@@ -532,6 +732,23 @@ exports.saleUpdate = async (req, res) => {
     });
 
     // ============================
+    // 📝 ACTIVITY LOG (SALE UPDATED)
+    // ============================
+    await logActivity({
+      user: req.user,
+      action: "UPDATE",
+      module: "Sale",
+      documentId: updatedSale._id,
+      description: `Sale (${updatedSale.code}) updated`,
+      // oldData: oldSaleData,
+      newData: {
+        title: updatedSale.code,
+        code: updatedSale.code,
+        status: "",
+      },
+    });
+
+    // ============================
     // 7. APPLY NEW STOCK (ATOMIC)
     // ============================
     for (const item of cleanedItems) {
@@ -605,11 +822,24 @@ exports.deleteSale = async (req, res) => {
     await SalesReturn.deleteMany({ sale: saleId }, { session });
 
     // 3️⃣ Delete the sale
-    await Sale.findByIdAndDelete(saleId, { session });
+    const saleDeleted = await Sale.findByIdAndDelete(saleId, { session });
 
     await session.commitTransaction();
     session.endSession();
 
+    await logActivity({
+      user: req.user,
+      action: "DELETE",
+      module: "Sale",
+      documentId: saleDeleted._id,
+      description: `Sale (${saleDeleted.code}) deleted`,
+      // oldData: oldSaleData,
+      newData: {
+        title: saleDeleted.code,
+        code: saleDeleted.code,
+        status: "",
+      },
+    });
     res.status(200).json({
       message: "Sale, related returns deleted, and stock reversed successfully",
     });
@@ -621,8 +851,75 @@ exports.deleteSale = async (req, res) => {
   }
 };
 
-// / BULK DELETE sales
+// BULK DELETE sales
 exports.bulkDeleteSale = async (req, res) => {
+  const { ids } = req.body; // array of sale IDs
+
+  const session = await Sale.startSession();
+  session.startTransaction();
+
+  try {
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: "No sale IDs provided" });
+    }
+
+    const sales = await Sale.find({ _id: { $in: ids } }).session(session);
+
+    for (const sale of sales) {
+      const saleId = sale._id;
+
+      // 🔹 Snapshot for activity log
+      const oldSaleData = sale.toObject();
+      const saleCode = sale.code;
+
+      // 1️⃣ Rollback Product stock & sale quantity
+      for (const item of sale.saleItems) {
+        await Product.findByIdAndUpdate(
+          item.productId,
+          {
+            $inc: {
+              saleQuantity: -item.quantity,
+              stockQuantity: item.quantity,
+            },
+          },
+          { session }
+        );
+      }
+
+      // 📝 Activity Log (per sale)
+      await logActivity({
+        user: req.user,
+        action: "DELETE",
+        module: "Sale",
+        documentId: saleId,
+        description: `Sale (${saleCode}) deleted via bulk delete`,
+        oldData: oldSaleData,
+        newData: null,
+      });
+    }
+
+    // 2️⃣ Delete all related sales returns
+    await SalesReturn.deleteMany({ sale: { $in: ids } }, { session });
+
+    // 3️⃣ Delete sales
+    await Sale.deleteMany({ _id: { $in: ids } }, { session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      message:
+        "Selected sales, related returns deleted, and stock reversed successfully",
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error bulk deleting sales:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.bulkDeleteSale1 = async (req, res) => {
   const { ids } = req.body; // array of sale IDs
 
   const session = await Sale.startSession();

@@ -34,7 +34,7 @@ const port = process.env.PORT || 5000;
 const corsOptions = {
   origin: [
     "https://etmcsventorys.onrender.com",
-    "https://inventory-management-system-xcvp.onrender.com",
+    "https://etmcsventory.etmcs.com.ng",
     "http://localhost:3000",
     "http://localhost:3001",
   ],
@@ -107,7 +107,7 @@ const upload = multer({
     const filetypes = /jpeg|jpg|png|gif|webp/;
     const mimetype = filetypes.test(file.mimetype);
     const extname = filetypes.test(
-      path.extname(file.originalname).toLowerCase()
+      path.extname(file.originalname).toLowerCase(),
     );
 
     if (mimetype && extname) {

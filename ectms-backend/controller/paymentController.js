@@ -1,6 +1,7 @@
 const Payment = require("../models/Payment");
 const Sale = require("../models/Sale");
 const Purchase = require("../models/Purchase");
+const logActivity = require("../utils/activityLogger");
 
 // Register Payment
 exports.registerPayment = async (req, res) => {
@@ -93,7 +94,7 @@ exports.registerPayment = async (req, res) => {
       action: "ADD",
       module: "Payment",
       documentId: newPayment._id,
-      description: `Add a payment for the invoice "${newPayment.paymentFor}"`,
+      description: `Added a payment for the invoice "${newPayment.paymentFor}"`,
       newData: {
         title: newPayment.paymentFor,
         code: newPayment.code,
@@ -125,7 +126,7 @@ exports.getPayment = async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.paymentId).populate(
       "userId",
-      "name email"
+      "name email",
     );
     if (!payment) return res.status(404).json({ message: "Payment not found" });
     res.status(200).json(payment);
@@ -381,7 +382,7 @@ exports.deletePayment = async (req, res) => {
       action: "DELETE",
       module: "Payment",
       documentId: paymentB._id,
-      description: `Updated a payment for the invoice "${paymentB.paymentFor}"`,
+      description: `Deleted a payment for the invoice "${paymentB.paymentFor}"`,
       newData: {
         title: paymentB.paymentFor,
         code: paymentB.code,
@@ -467,8 +468,36 @@ exports.bulkDeletePayment = async (req, res) => {
       }
     }
 
+    // 1️⃣ Fetch customers before deletion (for logging)
+    const paymentsB = await Payment.find({ _id: { $in: ids } });
+
+    if (paymentsB.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No Payments found.",
+      });
+    }
+
     // Step 3: Delete all payments in one go
     const result = await Payment.deleteMany({ _id: { $in: ids } });
+
+    // 3️⃣ Log activity per customer
+    await Promise.all(
+      paymentsB.map((payment) =>
+        logActivity({
+          user,
+          action: "DELETE",
+          module: "Payment",
+          documentId: payment._id,
+          description: `Deleted customer "${payment.paymentFor}" via bulk delete`,
+          oldData: {
+            title: payment.paymentFor,
+            code: payment.code,
+            status: "",
+          },
+        }),
+      ),
+    );
 
     res.status(200).json({
       success: true,
@@ -502,7 +531,7 @@ exports.getTotalPayableAmount = async (req, res) => {
     console.error(
       "Error getting total payable amount:",
       error.message,
-      error.stack
+      error.stack,
     );
     res
       .status(500)
@@ -589,7 +618,7 @@ exports.getSupplierPaymentHistory = async (req, res) => {
 
     // 4️⃣ Sort newest first
     paymentHistory.sort(
-      (a, b) => new Date(b.paymentDate) - new Date(a.paymentDate)
+      (a, b) => new Date(b.paymentDate) - new Date(a.paymentDate),
     );
 
     return res.status(200).json({

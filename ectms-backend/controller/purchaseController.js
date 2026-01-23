@@ -4,6 +4,7 @@ const Product = require("../models/Product");
 const Payment = require("../models/Payment");
 const PurchaseReturn = require("../models/PurchaseReturn");
 const Wastage = require("../models/Wastage");
+const logActivity = require("../utils/activityLogger");
 
 // register Purchase data
 // register Purchase data
@@ -30,6 +31,7 @@ exports.purchaseRegister = async (req, res) => {
       userId,
     } = req.body;
 
+    const user = req.user; // comes from verifyToken
     // Find last purchase with same prefix
     const lastPurchase = await Purchase.findOne({
       code: { $regex: `^${prefix}` },
@@ -124,6 +126,20 @@ exports.purchaseRegister = async (req, res) => {
       );
     }
 
+    // Activity log
+    await logActivity({
+      user,
+      action: "ADD",
+      module: "Purchase",
+      documentId: newPurchase._id,
+      description: `Added a purchase "${newPurchase.code}"`,
+      newData: {
+        title: newPurchase.code,
+        code: newPurchase.code,
+        status: "",
+      },
+    });
+
     res.status(200).json({
       message: "Purchase saved successfully",
       newPurchase,
@@ -134,148 +150,6 @@ exports.purchaseRegister = async (req, res) => {
       message: "Internal server error",
       error: error.message,
     });
-  }
-};
-
-// ==========================
-exports.purchaseRegister1 = async (req, res) => {
-  try {
-    const {
-      purchaseDate,
-      supplier,
-      purchaseStatus,
-      reference,
-      purchaseAmount,
-      paymentType,
-      paymentStatus,
-      amountPaid,
-      dueBalance,
-      note,
-      subTotal,
-      otherCharges,
-      discount,
-      discountValue,
-      shipping,
-      purchaseItems = [],
-      prefix,
-      userId,
-    } = req.body;
-
-    // Find the last expense with the same prefix
-    const lastPurchase = await Purchase.findOne({
-      code: { $regex: `^${prefix}` },
-    })
-      .sort({ code: -1 })
-      .exec();
-
-    let lastSerial = 0;
-
-    if (lastPurchase && lastPurchase.code) {
-      const match = lastPurchase.code.match(/\d+$/); // Extract the numeric part from the code
-      if (match) {
-        lastSerial = parseInt(match[0], 10);
-      }
-    }
-    const serial = (lastSerial + 1).toString().padStart(4, "0");
-    const code = `${prefix}${serial}`;
-
-    // Purchase Item
-    const cleanedItems = purchaseItems.map((item) => ({
-      productId: item.productId,
-      title: item.title,
-      quantity: Number(item.quantity),
-      price: Number(item.price),
-      tax: Number(item.tax),
-      taxAmount: Number(item.taxAmount),
-      unitCost: Number(item.unitCost),
-      amount: Number(item.amount),
-    }));
-    console.log("🧾 Received Purchase Items:", purchaseItems);
-    console.log("🧾 Processed Items:", cleanedItems);
-    console.log("🧾 Creating purchase with data:");
-    // Create purchase instance
-    const newPurchase = new Purchase({
-      code,
-      purchaseDate,
-      supplier,
-      purchaseStatus,
-      reference,
-      purchaseAmount,
-      paymentType,
-      paymentStatus,
-      amountPaid,
-      dueBalance,
-      note,
-      subTotal,
-      otherCharges,
-      discount,
-      discountValue,
-      shipping,
-      userId,
-      purchaseItems: cleanedItems,
-    });
-
-    // Enforce dueBalance & amountPaid rules
-    if (paymentStatus === "unpaid") {
-      newPurchase.amountPaid = 0;
-      newPurchase.dueBalance = newPurchase.purchaseAmount;
-    } else if (paymentStatus === "paid") {
-      newPurchase.amountPaid = newPurchase.purchaseAmount;
-      newPurchase.dueBalance = 0;
-    } else if (paymentStatus === "partial") {
-      if (!newPurchase.amountPaid) {
-        newPurchase.dueBalance =
-          newPurchase.purchaseAmount - newPurchase.amountPaid;
-      }
-    }
-
-    await newPurchase.save();
-
-    // ================================
-    // 4. SAVE PAYMENT RECORD IF NEEDED
-    // ================================
-    if (paymentStatus === "paid" || paymentStatus === "partial") {
-      await Payment.create({
-        paymentDate: purchaseDate, // value from saleDate
-        paymentFor: code, // sale code (e.g. SA0001)
-        invoiceNo: code, // same as paymentFor
-        dueBalance: newPurchase.dueBalance, // remaining balance
-        payableAmount: newPurchase.amountPaid, // how much was paid NOW
-        paymentType: paymentType, // cash/card/online etc.
-        note,
-        userId,
-      });
-    }
-
-    // loop through the purchase Items and increase the product purchase quantity accordingly
-    for (const item of cleanedItems) {
-      // check if is valid productId
-      if (!mongoose.Types.ObjectId.isValid(item.productId)) {
-        console.error("❌ Invalid productId:", item.productId);
-        continue;
-      }
-
-      await Product.findByIdAndUpdate(
-        item.productId,
-        {
-          $inc: {
-            purchaseQuantity: item.quantity,
-            stockQuantity: item.quantity,
-          },
-        },
-        { new: true }
-      );
-    }
-
-    res.status(200).json({
-      message: "Purchase saved successful",
-      newPurchase,
-    });
-  } catch (error) {
-    console.error("❌ Purchase Register Error:", error); // Full error object
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
   }
 };
 
@@ -413,9 +287,6 @@ exports.getSupplierPaymentSummary = async (req, res) => {
 };
 
 // ========================
-// FETCH SUPPLIER OUTSTANDING PURCHASE
-// ========================
-// ========================
 // FETCH SUPPLIER OUTSTANDING PURCHASES
 // ========================
 exports.getSupplierOutstandingPurchase = async (req, res) => {
@@ -473,7 +344,7 @@ exports.purchaseUpdate = async (req, res) => {
       purchaseItems = [],
       userId,
     } = req.body;
-
+    const user = req.user; // comes from verifyToken
     if (!mongoose.Types.ObjectId.isValid(purchaseId)) {
       return res.status(400).json({ message: "Invalid purchase ID" });
     }
@@ -622,6 +493,20 @@ exports.purchaseUpdate = async (req, res) => {
       );
     }
 
+    // Activity log
+    await logActivity({
+      user,
+      action: "UPDATE",
+      module: "Purchase",
+      documentId: updatedPurchase._id,
+      description: `Updated a purchase "${updatedPurchase.code}"`,
+      newData: {
+        title: updatedPurchase.code,
+        code: updatedPurchase.code,
+        status: "",
+      },
+    });
+
     res.status(200).json({
       message: "Purchase updated successfully",
       updatedPurchase,
@@ -638,6 +523,7 @@ exports.purchaseUpdate = async (req, res) => {
 // delete purchase
 exports.deletePurchase = async (req, res) => {
   const { purchaseId } = req.params;
+  const user = req.user; // comes from verifyToken
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -684,7 +570,23 @@ exports.deletePurchase = async (req, res) => {
     }
 
     // 5️⃣ DELETE purchase
-    await Purchase.findByIdAndDelete(purchaseId, { session });
+    const purchaseDeleted = await Purchase.findByIdAndDelete(purchaseId, {
+      session,
+    });
+
+    // Activity log
+    await logActivity({
+      user,
+      action: "DELETE",
+      module: "Purchase",
+      documentId: purchaseDeleted._id,
+      description: `Deleted a purchase "${purchaseDeleted.code}"`,
+      newData: {
+        title: purchaseDeleted.code,
+        code: purchaseDeleted.code,
+        status: "",
+      },
+    });
 
     await session.commitTransaction();
     session.endSession();
@@ -718,6 +620,10 @@ exports.bulkDeletePurchase = async (req, res) => {
     for (const purchase of purchases) {
       const purchaseId = purchase._id;
 
+      // 🔹 Keep a snapshot for activity log
+      const oldPurchaseData = purchase.toObject();
+      const purchaseCode = purchase.code; // adjust field name if different
+
       // 1️⃣ Handle wastages: remove wastageQuantity only, restore stockQuantity
       const wastages = await Wastage.find({ purchaseId }).session(session);
       for (const waste of wastages) {
@@ -725,8 +631,8 @@ exports.bulkDeletePurchase = async (req, res) => {
           waste.productId,
           {
             $inc: {
-              wasteQuantity: -waste.quantity, // remove from wastageQuantity
-              stockQuantity: +waste.quantity, // restore stock
+              wasteQuantity: -waste.quantity,
+              stockQuantity: +waste.quantity,
             },
           },
           { session }
@@ -755,6 +661,21 @@ exports.bulkDeletePurchase = async (req, res) => {
 
       // 5️⃣ Delete purchase
       await Purchase.findByIdAndDelete(purchaseId, { session });
+
+      // 6️⃣ Activity Log (outside DB mutations but still in flow)
+      await logActivity({
+        user: req.user,
+        action: "DELETE",
+        module: "Purchase",
+        documentId: purchaseId,
+        description: `Purchase (${purchaseCode}) deleted via bulk delete`,
+        oldData: oldPurchaseData,
+        newData: {
+          title: purchaseCode,
+          code: purchaseCode,
+          status: "",
+        },
+      });
     }
 
     await session.commitTransaction();
