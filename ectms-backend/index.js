@@ -36,7 +36,6 @@ const corsOptions = {
     "https://etmcsventorys.onrender.com",
     "https://etmcsventory.etmcs.com.ng",
     "http://localhost:3000",
-    "http://localhost:3001",
   ],
   credentials: true,
 };
