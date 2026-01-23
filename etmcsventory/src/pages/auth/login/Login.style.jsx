@@ -65,7 +65,8 @@ img{
 export const FormWrapper = styled.div`
     width: 50%;
     color: white;
-    background-color: #002300ff;
+    /* background-color: #002300ff; */
+    background-color: #197544;
     display:flex;
     flex-direction: column;
     padding-left:100px;
