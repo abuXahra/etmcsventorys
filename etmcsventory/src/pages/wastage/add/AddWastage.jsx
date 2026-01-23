@@ -1042,7 +1042,7 @@ const deleteRefundItem = (index) => {
                             {/* Add to Purchase Return button */}
                                     <ItemButtonWrapper btnAlign={'flex-start'}>
                                         <Button
-                                            btnText={isBtnLoading ? <ButtonLoader text={'Adding...'} /> : 'Add Return'}
+                                            btnText={isBtnLoading ? <ButtonLoader text={'Adding...'} /> : 'Add Wastage'}
                                             btnFontSize={'12px'}
                                             btnColor={'green'}
                                             btnTxtClr={'white'}

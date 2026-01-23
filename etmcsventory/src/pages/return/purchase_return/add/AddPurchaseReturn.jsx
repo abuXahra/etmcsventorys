@@ -344,7 +344,7 @@ const token = localStorage.getItem('token');
                 setCurrencySymbol(res.data.currencySymbol)
 
                 if (prefixData) {
-                    setPrefix(prefixData.purchase);
+                    setPrefix(prefixData.purchaseReturn);
                 }
 
                 setIsLoading(false);

@@ -112,6 +112,8 @@ const [dueBalance, setDueBalance] = useState('');
 
 const [purchaseCode, setPurchaseCode] = useState('');
 
+const [taxItems, setTaxItems] = useState([])
+
 
 // onchange handler
 const handleChange = (type, e)=>{
@@ -331,6 +333,34 @@ const paymentStatusItems = [
 ]
 
 useEffect(()=>{
+    const getAllTax = async () => { 
+                            // setIsLoading(true)  
+                            try {
+                                  const res = await axios.get(process.env.REACT_APP_URL + "/api/tax/", {
+                                                                      headers: {
+                                                                        Authorization: `Bearer ${token}`
+                                                                      }
+                                                                })
+                                 
+                                        // Prepend the 'Select' option
+                           setTaxItems([
+                                    { title: 'Select', value: '' }, 
+                                    ...res.data.map(tax => ({
+                                        title: tax.name,
+                                        value: tax.taxPercentage
+                                    }))])
+                                                
+                                //   setIsLoading(false)
+                
+                                  console.log(res.data)
+                              } catch (err) {
+                                  console.log(err)
+                                //   setIsLoading(false)
+                              }
+                      
+                          }
+            getAllTax()
+
     // fetch purchase data
         const getPurchaseData = async () => {
             setIsLoading(true) 
@@ -820,7 +850,7 @@ const hanldeSumbit = async (e) =>{
                             />                  
                             
                             <SelectInput 
-                                options={TaxItem} 
+                                options={taxItems} 
                                 label={'Tax(%)'}
                                 value={tax}
                                 error={taxError}

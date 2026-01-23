@@ -175,6 +175,9 @@ const token = localStorage.getItem('token');
     }
 
   }
+
+  const TOTAL = saleData?.saleAmount - saleReturnData?.returnAmount;
+
   return (
     <ViewSalesWrapper>
     {/* Page title */}
@@ -346,7 +349,7 @@ const token = localStorage.getItem('token');
               
                                   {/* Grand Total*/}
                                 <div>
-                                  <span><b>Grand Total</b></span>
+                                  <span><b>{saleReturnData.returnItems?.length > 0 ? "Total": "Grand Total"}</b></span>
                                   <span><b><span dangerouslySetInnerHTML={{ __html: companyData.currencySymbol }}/>
                                   {saleData?.saleAmount?.toLocaleString('en-NG', { 
                                     minimumFractionDigits: 2, 
@@ -476,6 +479,34 @@ const token = localStorage.getItem('token');
                 <hr />
               </NoteWrapper>
                <br/>
+
+        <InfoBillWrapper clm={'row'} jstCont={'space-between'}>
+          {/* our info */}
+           <div>
+              <h3> </h3>
+              
+              <div>
+                  <span><b></b></span>
+              </div>
+           </div>
+
+           {/* customer info */}
+             <div>
+              <h3>AMOUNT PAID</h3>
+              <hr />
+              <div>
+                  <span><b>Grand Total:</b></span>
+                 
+                 
+                  <span><b><span dangerouslySetInnerHTML={{ __html: companyData.currencySymbol }}/>
+                  {TOTAL.toLocaleString('en-NG', { 
+                                    minimumFractionDigits: 2, 
+                                    maximumFractionDigits: 2 
+                                  })}</b>
+                                  </span>
+              </div>
+           </div>
+        </InfoBillWrapper>
 </>)}
       </InvoiceWrapper>
   

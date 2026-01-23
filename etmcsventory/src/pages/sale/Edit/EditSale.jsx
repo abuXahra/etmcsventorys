@@ -136,6 +136,8 @@ export default function EditSale() {
 
   const [prodTitle, setProdTitle] = useState('')
   const [prodStock, setProdStock] = useState('')
+  
+  const [taxItems, setTaxItems] = useState([]);
 
   // navigate to add out of stock item purchaseFunc
   const navigateToAddStock = () => {
@@ -304,6 +306,35 @@ export default function EditSale() {
   const [showWalkingCustomerField, setShowWalkingCustomerField] = useState(false)
   
   useEffect(() => {
+
+     const getAllTax = async () => { 
+                            // setIsLoading(true)  
+                            try {
+                                  const res = await axios.get(process.env.REACT_APP_URL + "/api/tax/", {
+                                                                      headers: {
+                                                                        Authorization: `Bearer ${token}`
+                                                                      }
+                                                                })
+                                 
+                                        // Prepend the 'Select' option
+                           setTaxItems([
+                                    { title: 'Select', value: '' }, 
+                                    ...res.data.map(tax => ({
+                                        title: tax.name,
+                                        value: tax.taxPercentage
+                                    }))])
+                                                
+                                //   setIsLoading(false)
+                
+                                  console.log(res.data)
+                              } catch (err) {
+                                  console.log(err)
+                                //   setIsLoading(false)
+                              }
+                      
+                          }
+            getAllTax()
+
     // fetch purchase data
     const getSaleData = async () => {
       setIsLoading(true)
@@ -923,7 +954,7 @@ const dropdownHandler = (product) => {
                       />
 
                       <SelectInput
-                        options={TaxItem}
+                        options={taxItems}
                         label={'Tax(%)'}
                         value={tax}
                         error={taxError}

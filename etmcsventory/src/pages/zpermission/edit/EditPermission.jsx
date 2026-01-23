@@ -13,24 +13,7 @@ import Checkbox from "../../../components/input/checkbox/Checkbox";
 import { ItemButtonWrapper } from "../../../components/item_container/itemContainer.style";
 import Button from "../../../components/clicks/button/Button";
 import ButtonLoader from "../../../components/clicks/button/button_loader/ButtonLoader";
-// import { token } from "../../components/context/UserToken";
-// import PageTitle from "../../components/page_title/PageTitle";
-// import Button from "../../components/clicks/button/Button";
-// import ButtonLoader from "../../components/clicks/button/button_loader/ButtonLoader";
-// import { useNavigate } from "react-router-dom";
 
-// import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import PageTitle from "../../../components/page_title/PageTitle";
-// import ButtonLoader from "../../../components/clicks/button/button_loader/ButtonLoader";
-// import Button from "../../../components/clicks/button/Button";
-// import { AddPermissionContent, AddPermissionWrapper, ItemsWrapper, SelectItemContent } from "./addPermission.style";
-// import ItemContainer from "../../../components/item_container/ItemContainer";
-// import Input from "../../../components/input/Input";
-// import { AnyItemContainer } from "../../purchase/add/addPurchase.style";
-// import { ItemButtonWrapper } from "../../../components/item_container/itemContainer.style";
-// import Checkbox from "../../../components/input/checkbox/Checkbox";
-// import { EditPermissionContent, EditPermissionWrapper } from "./editPermission.style";
 
 export default function EditPermission() {
     const {permissionId} = useParams();

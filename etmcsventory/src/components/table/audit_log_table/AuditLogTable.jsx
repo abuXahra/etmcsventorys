@@ -140,7 +140,56 @@ const AuditLogTable = ({data, onDeleteAudit, auditPermission}) => {
             return parts.join(' ');
         }
 
-                
+
+        const handleNavigate = (moduleName, documentId) => {
+         
+          if(moduleName === 'Category'){
+            return  navigate(`/category-detail/${documentId}`)
+          }else if(moduleName === 'Product'){
+             return navigate(`/product-detail/${documentId}`)
+          } else if(moduleName === 'Sale'){
+            return navigate(`/sale-invoice/${documentId}`)
+          } else if(moduleName === 'Customer'){
+            return navigate(`/customers/${documentId}`)
+          } else if(moduleName === 'Purchase'){
+            return navigate(`/purchase-invoice/${documentId}`)
+          } else if(moduleName === 'Supplier'){
+            return navigate(`/supplier-detail/${documentId}`)
+          } else if(moduleName === 'Payment'){
+            return navigate(`/edit-payment/${documentId}`)
+          } else if(moduleName === 'Expense'){
+            return navigate(`/edit-expense/${documentId}`)
+          } else if(moduleName === 'SaleReturn'){
+            return navigate(`/sale-return/${documentId}`)
+          }
+           else if(moduleName === 'PurchaseReturn'){
+            return navigate(`/purchase-return/${documentId}`)
+          }
+         else if(moduleName === 'Company'){
+            return navigate(`/company-profile`)
+          }
+           else if(moduleName === 'Tax'){
+            return navigate(`/edit-tax/${documentId}`)
+          }
+            else if(moduleName === 'Unit'){
+            return navigate(`/edit-unit/${documentId}`)
+          }
+
+          else if(moduleName === 'User'){
+            return navigate(`/edit-user/${documentId}`)
+          }
+          
+        else if(moduleName === 'Wastage'){
+            return navigate(`/wastage-detail/${documentId}`)
+          }
+
+       else if(moduleName === 'Permission'){
+            return navigate(`/edit-permission/${documentId}`)
+          }
+      }
+
+            
+      
   const columns = [
 
         {
@@ -243,7 +292,7 @@ const AuditLogTable = ({data, onDeleteAudit, auditPermission}) => {
              {showDetailCard &&
               <Overlay 
                 contentWidth={'50%'}
-                overlayButtonClick={()=>navigate(`/category-detail/${docId}`)}
+                overlayButtonClick={()=>handleNavigate(module,docId)}
                 closeOverlayOnClick={()=>setShowDetailCard(false)}
                 alternatFunc={()=>handleDelete(grabId)}
                 btnText1={'View Detail'}

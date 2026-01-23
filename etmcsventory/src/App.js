@@ -187,7 +187,11 @@ function App() {
             element={user ? <Navigate to="/dashboard" /> : <Login />}
           />
           <Route path="/loader" element={<PagePreloader />} />
-          <Route path="/register" element={<Register />} />
+          {/* <Route path="/register" element={<Register />} /> */}
+          <Route
+            path="/register"
+            element={user ? <Navigate to="/dashboard" replace /> : <Register />}
+          />
           <Route path="/login" element={<Navigate to="/" replace />} />
         </Routes>
       ) : (
@@ -1181,6 +1185,7 @@ function App() {
               path="/company-calender"
               element={<ProtectedRoute element={<MyCalender />} />}
             />
+
             <Route
               path="/permission"
               element={

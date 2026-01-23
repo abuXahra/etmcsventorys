@@ -32,7 +32,7 @@ const token = localStorage.getItem('token');
         {
             title: 'User',
             value: 'user'
-        },
+        },  
     ]
 
 

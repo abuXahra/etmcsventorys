@@ -31,23 +31,23 @@ const token = localStorage.getItem('token');
     const [showPicture, setShowPicture] = useState(true);
 
     // name
-    const [name, setName] = useState('John Doe');
+    const [name, setName] = useState('');
     const [nameError, setNameError] = useState(false);
 
 // phone
-    const [phone, setPhone] = useState('+234900000000');
+    const [phone, setPhone] = useState('');
     const [phoneError, setPhoneError] = useState(false);
 
     const [file, setFile] = useState('');
     let [photo, setPhoto] = useState('');
 
 // email
-    const [email, setEmail] = useState('johndoe@mail.com');
+    const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState(false);
 // tax
-    const [tax, setTax] = useState('5567777');
+    const [tax, setTax] = useState('');
 // address
-    const [address, setAddress] = useState('living address')
+    const [address, setAddress] = useState('')
     const [addressError, setAddressError] = useState(false);
 
     const handleChange = (type, e) =>{

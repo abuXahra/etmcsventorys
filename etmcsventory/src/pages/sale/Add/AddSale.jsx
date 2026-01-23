@@ -117,6 +117,7 @@ const [showStockCard, setShowStockCard] = useState(false);
 
 const [prodTitle, setProdTitle]= useState('');
 const [prodStock, setProdStock]= useState('');
+const [taxItems, setTaxItems] = useState('')
 
 
 // navigate to add out of stock item purchaseFunc
@@ -397,7 +398,33 @@ useEffect(() => {
     const [currencySymbol, setCurrencySymbol] = useState('')
 
 useEffect(() => {
-
+ const getAllTax = async () => { 
+                        // setIsLoading(true)  
+                        try {
+                              const res = await axios.get(process.env.REACT_APP_URL + "/api/tax/", {
+                                                                  headers: {
+                                                                    Authorization: `Bearer ${token}`
+                                                                  }
+                                                            })
+                             
+                                    // Prepend the 'Select' option
+                       setTaxItems([
+                                { title: 'Select', value: '' }, 
+                                ...res.data.map(tax => ({
+                                    title: tax.name,
+                                    value: tax.taxPercentage
+                                }))])
+                                            
+                            //   setIsLoading(false)
+            
+                              console.log(res.data)
+                          } catch (err) {
+                              console.log(err)
+                            //   setIsLoading(false)
+                          }
+                  
+                      }
+        getAllTax()
      const fetchCompany = async() =>{
         //   setIsLoading(true)
             try {
@@ -945,7 +972,7 @@ if (itemList.length === 0) {
                             />                  
                             
                             <SelectInput 
-                                options={TaxItem} 
+                                options={taxItems} 
                                 label={'Tax(%)'}
                                 value={tax}
                                 error={taxError}

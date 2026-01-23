@@ -38,7 +38,7 @@ const CategoryTable = ({data, onDeleteCat, categoryPermission}) => {
                 const response = await onDeleteCat(categoryId); // call parent function
             
                 if (response.success) {
-                  toast.success('Tax deleted successfully');
+                  toast.success('Category deleted successfully');
                   setShowDeleteCard(false); // Close modal
                 } else {
                   toast.error('Error deleting message: ' + response.message);

@@ -50,7 +50,8 @@ export const LogoWrapper = styled.div`
     border: 1px solid #cccccc;
     border-radius: 5px;
     padding: 5px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    box-shadow:
+      rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
       rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
 
     img {
@@ -108,6 +109,8 @@ export const InfoBillWrapper = styled.div`
     div {
       display: flex;
       flex-direction: column;
+      justify-content: ${({ jstCont }) => jstCont || ""};
+      flex-direction: ${({ clm }) => clm || "column"};
       gap: 2px;
     }
   }
