@@ -350,8 +350,10 @@ function DashboardHome() {
         <GreetingWrapper>
           <GreetingCard>
             {user && <h1>Welcome</h1>}         
-            <h4 style={{textTransform: "capitalize"}}>{user && user?.username}</h4>
-            <span style={{textTransform: "capitalize"}}>{user && user?.role}</span>
+            <h4 style={{textTransform: "capitalize"}}>{user && user?.username}<span style={{textTransform: "capitalize", }}>
+              {user && user?.role}</span>
+            </h4>
+            
           </GreetingCard>
 
           <DateTimeWrapper>

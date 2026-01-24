@@ -119,13 +119,15 @@ export default function Register() {
                 type={'text'}
                 title={"Username"}
                 value={username}
-                placeholder={"username"}
+                // placeholder={"username"}
                 // error={emailError}
                 onChange={(e)=>onChangeHandler('username', e)}
                 inputPadding={"15px"}
                 bdColor={'white'}
                 inputWidth={"100%"}
                 labelColor={"white"}
+                txtColor={'#ffffff'} 
+                fontSize={'14px'}
             />
 
             <Input
@@ -133,13 +135,15 @@ export default function Register() {
                 type={'email'}
                 title={"Email"}
                 value={email}
-                placeholder={"email"}
+                // placeholder={"email"}
                 // error={emailError}
                 onChange={(e)=>onChangeHandler('email', e)}
                 inputPadding={"15px"}
                 bdColor={'white'}
                 inputWidth={"100%"}
                 labelColor={"white"}
+                txtColor={'#ffffff'} 
+                fontSize={'14px'}
             />
 
              <Input
@@ -147,13 +151,15 @@ export default function Register() {
                 type={"password"}
                 title={"Password"}
                 value={password}
-                placeholder={"password"}
+                // placeholder={"password"}
                 // error={passwordError}
                 onChange={(e)=>onChangeHandler('password', e)}
                 inputPadding={"15px"}
                 inputWidth={"100%"}
                 bdColor={'white'}
                 labelColor={"white"}
+                txtColor={'#ffffff'} 
+                fontSize={'14px'}
                     />
                 
          <Button btnColor={'orange'} btnPd={'15px 30px'} btnText={isLoading? <ButtonLoader text="Processing..." />  : 'Register'}/>

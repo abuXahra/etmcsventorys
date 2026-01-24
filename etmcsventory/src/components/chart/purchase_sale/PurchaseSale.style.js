@@ -5,7 +5,8 @@ export const PurchaseSaleWrapper = styled.div`
   width: 60%;
   background-color: white;
   border-radius: 10px;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
 
   @media (max-width: 768px) {
@@ -27,7 +28,7 @@ export const BarChatWrapper = styled.div`
   width: 100%;
   height: 200px;
   padding: 20px;
-  margin-left: -20px;
+  margin-right: 20px;
 `;
 
 export const ResponsiveContainerStyled = styled(ResponsiveContainer)`

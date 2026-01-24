@@ -46,7 +46,7 @@ export const InputStyle = styled.input`
     padding: ${({inputPadding})=>inputPadding || '12px'};
     background-color: ${({inputBg}) => inputBg || 'transparent'};
     color: ${({txtColor})=> txtColor || "grey"};
-    font-size: 10px;
+    font-size: ${({fontSize})=> fontSize || "10px"};
     width: 100%;
 
     &:focus {

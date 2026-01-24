@@ -106,7 +106,7 @@ export default function Siderbar({
       <SidebarHeader>
         <img style={{width: "20px", height: "20px"}} src={inventoryLogo} alt="" srcset="" />
         {/* <h2>flowVentory</h2> */}
-          <h2>EtmcsVentory</h2>
+          <h3>EtmcsVentory</h3>
         <HamburgerWrapperi onClick={onClose}>
           <IoMdClose />
         </HamburgerWrapperi>

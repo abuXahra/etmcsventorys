@@ -66,12 +66,12 @@ export const FormWrapper = styled.div`
     width: 50%;
     color: white;
     /* background-color: #002300ff; */
-    background-color: #197544;
+    background-color: #023603;
     display:flex;
     flex-direction: column;
     padding-left:100px;
     padding-right: 100px;
-    gap: 20px;
+    gap: 5px;
     justify-content: center;
     align-items: center;
     border-radius: 100px 0px;
@@ -83,7 +83,7 @@ export const FormWrapper = styled.div`
         display: flex;
         flex-direction: column;
         // padding: 0px 40px;
-        gap: 20px;
+        gap: 10px;
     }
     
         img{

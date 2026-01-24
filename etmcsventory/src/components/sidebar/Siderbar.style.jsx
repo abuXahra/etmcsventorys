@@ -5,7 +5,7 @@ export const SidebarWrapper  = styled.div`
         height: 100vh;
         width: 200px; //240
         /* background-color: #00032a; */
-        background-color: #197544;
+        background-color: #023603;
         color: white;
         position: fixed;
         top: 0;

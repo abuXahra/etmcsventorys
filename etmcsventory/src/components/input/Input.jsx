@@ -4,7 +4,7 @@
 import { FiSearch } from 'react-icons/fi'
 import { InputError, InputIcon, InputLabel, InputStyle, InputWrapper } from './Input.style'
 
-export default function Input({Icon, iconColor, title, value, inputBg, labelColor, txtColor, error, bdColor, onChange, placeholder, requiredSymbol, InputWidth, type, maxLength, label, inputPadding, inputDisplay}) {
+export default function Input({Icon, iconColor, title, value, inputBg, labelColor, txtColor, fontSize, error, bdColor, onChange, placeholder, requiredSymbol, InputWidth, type, maxLength, label, inputPadding, inputDisplay}) {
 
   return (
                 <InputWrapper InputWidth={InputWidth} inputDisplay={inputDisplay}>
@@ -19,6 +19,7 @@ export default function Input({Icon, iconColor, title, value, inputBg, labelColo
                         bdColor={bdColor}
                         txtColor={txtColor}
                         inputBg={inputBg}
+                        fontSize={fontSize}
                     />
                     <InputIcon iconColor={iconColor}>{Icon}</InputIcon>
                     {error? <InputError>{title} is required</InputError> : '' }
