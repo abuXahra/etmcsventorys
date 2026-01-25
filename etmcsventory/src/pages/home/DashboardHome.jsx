@@ -10,7 +10,7 @@ import HomePurchaseList from '../../components/table/purchase_table/home_purchas
 import HomeSaleList from '../../components/table/sale_table/home_salelist/HomeSaleList'
 import { UserContext } from '../../components/context/UserContext'
 import { ArrowWrapper, ItemDetails } from '../reports/reportsPage.style'
-import { FaChartPie, FaLongArrowAltRight, FaPeopleCarry, FaRecycle } from 'react-icons/fa'
+import { FaChartPie, FaLongArrowAltRight, FaPeopleCarry, FaRecycle, FaUserCog, FaUserSecret, FaUser} from 'react-icons/fa'
 import { IoIosPeople } from 'react-icons/io'
 import { PiInvoiceBold } from 'react-icons/pi'
 import { IoBagSharp, IoPricetagsSharp } from 'react-icons/io5'
@@ -211,7 +211,20 @@ function DashboardHome() {
 
     }, []);
     
-  
+  const UserRoleIcon = ({ role }) => {
+  switch (role) {
+    case 'admin':
+      // Admin icon (user with gear)
+      return <FaUserCog/>;
+    // case 'manager':
+    //   // Another variation for manager
+    //   return <FaUserSecret/>;
+    case 'user':
+    default:
+      // Standard user icon
+      return <FaUser/>;
+  }
+};
     const overAllProfit = 
     (saleInvoice + totalStockAmount ) - (purchaseInvoice + expenses + totalWastageAmount )
     
@@ -350,16 +363,20 @@ function DashboardHome() {
         <GreetingWrapper>
           <GreetingCard>
             {user && <h1>Welcome</h1>}         
-            <h4 style={{textTransform: "capitalize"}}>{user && user?.username}<span style={{textTransform: "capitalize", }}>
-              {user && user?.role}</span>
-            </h4>
+            <h4 style={{textTransform: "capitalize"}}>{user && user?.username}</h4>
             
           </GreetingCard>
 
-          <DateTimeWrapper>
-            <span><MdOutlineDateRange /></span>
-            <span>Today: {new Date().toDateString()}</span>
-          </DateTimeWrapper>
+          <div style={{display: "flex", flexDirection: "column"}}>
+            <DateTimeWrapper>
+              <span><MdOutlineDateRange /></span>
+              <span>Today: {new Date().toDateString()}</span>
+            </DateTimeWrapper>
+            <DateTimeWrapper>
+              <span><UserRoleIcon role={user?.role} /></span>
+              <span>Role:v{user && user?.role}</span>
+            </DateTimeWrapper>
+          </div>
         </GreetingWrapper>
 
     {/* Quick links */}
@@ -402,7 +419,7 @@ function DashboardHome() {
         <HomePurchaseList/>
       </Container>
             <Container>
-               <HomeExpComponent header={"Product Expiration"}/>     
+               <HomeExpComponent header={"Product Expiration"}/>    
             </Container>
 
 

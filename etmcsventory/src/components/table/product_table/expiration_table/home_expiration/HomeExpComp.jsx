@@ -144,7 +144,7 @@ export default function HomeExpComponent({header}) {
               <ExpirationTable
                          tbPdn={'0px'}
                          show={false}
-                         data={products.slice(0, 3)}
+                         data={products.slice(0, 5)}
                          currencySymbol={company?.currencySymbol}
                          productPermission={effectivePermission}
                     />

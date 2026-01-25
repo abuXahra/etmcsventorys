@@ -64,6 +64,7 @@ export const DateTimeWrapper = styled.div`
     display: flex;
     gap: 10px;
     font-size: 12px;
+    align-items: center;
 `
 
 
