@@ -374,7 +374,7 @@ function DashboardHome() {
             </DateTimeWrapper>
             <DateTimeWrapper>
               <span><UserRoleIcon role={user?.role} /></span>
-              <span>Role:v{user && user?.role}</span>
+              <span>Role: {user && user?.role}</span>
             </DateTimeWrapper>
           </div>
         </GreetingWrapper>
