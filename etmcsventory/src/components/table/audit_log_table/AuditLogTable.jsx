@@ -141,6 +141,15 @@ const AuditLogTable = ({data, onDeleteAudit, auditPermission}) => {
         }
 
 
+        const auditTime = (time) => {
+          const date = new Date(time);
+          return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+          });
+        };
+
         const handleNavigate = (moduleName, documentId) => {
          
           if(moduleName === 'Category'){
@@ -192,48 +201,64 @@ const AuditLogTable = ({data, onDeleteAudit, auditPermission}) => {
       
   const columns = [
 
-        {
-        name: 'Date',
-        width: '12%',
-        sortable: true,
-        selector: (row) => {
-            const date = new Date(row.createdAt);
-            const parts = date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            }).split(' ');
-            parts[0] = parts[0].replace(/([A-Za-z]+)/, '$1.'); // Add period
-            return parts.join(' ');
-        },
-        },
-
     {
-        name: 'Username',
-        selector: (row) => row.username,
-        sortable: true,
-         width: '20%',
-      },
+  name: 'Date',
+  width: '12%',
+  sortable: true,
+  cell: (row) => {
+    const date = new Date(row.createdAt);
 
-      
+    const formattedDate = date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+
+    const formattedTime = date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <span>{formattedDate}</span>
+        <span style={{ fontSize: '10px', color: '#888' }}>
+          {formattedTime}
+        </span>
+      </div>
+    );
+  },
+},
+
+
+     {
+      name: 'Username',
+      sortable: true,
+      width: '20%',
+      cell: (row) => (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span>{row.username}</span>
+          <span style={{ fontSize: '10px', color: '#888' }}>
+            {row.user?.role || '—'}
+          </span>
+        </div>
+      ),
+    },
+ 
       {
         name: 'Module',
         selector: (row) => row.module,
         sortable: true,
         width: '10%', // Set a different width
       },
-    // {
-    //     name: 'Action',
-    //     selector: (row) => row.action,
-    //     sortable: true,
-    //     width: '10%', // Set a different width
-    //   },
         
     {
       name: 'Activity',
       selector: (row) => row.description,
       sortable: true,
-      width: '35%',
+      // width: '30%',
+       width: '40%',
     },
     
     {
@@ -243,7 +268,7 @@ const AuditLogTable = ({data, onDeleteAudit, auditPermission}) => {
         {/* {auditPermission?.canEdit &&   <ActionButton clr='green' onClick={() => navigate(`/edit-customer/${row._id}`)}><FaEdit/> Edit</ActionButton>}
            {auditPermission?.canView && <ActionButton clr="blue" onClick={() => navigate(`/customers/${row._id}`)}><FaEye/> View</ActionButton>}
           {auditPermission?.canDelete && <ActionButton clr="red" onClick={() =>  handleGrabId(row._id, row.name)}><FaTrash/> Delete</ActionButton>}*/}
-            {  <ActionButton clr="red" onClick={() =>  handleGrabId(row?._id, row.newData.title)}><FaTrash/> Delete</ActionButton>}
+            {/* {  <ActionButton clr="red" onClick={() =>  handleGrabId(row?._id, row.newData.title)}><FaTrash/> Delete</ActionButton>} */}
            {row.action !== 'DELETE' && <ActionButton clr="blue" onClick={() => handleActivityDetail(row._id, row.documentId, row.username, row.newData.title, row.module, row.description, row.createdAt)}><FaEye/> View</ActionButton>}
 
         </ActionButtons>
@@ -268,9 +293,9 @@ const AuditLogTable = ({data, onDeleteAudit, auditPermission}) => {
               paginationRowsPerPageOptions={[10, 25, 50, 100]} // Options in the dropdown
               responsive
               customStyles={customStyles}
-              selectableRows// 👈 only show checkboxes if delete permission is true
-              onSelectedRowsChange={({ selectedRows }) => setSelectedAuditLog(selectedRows)}
-              selectableRowHighlight
+              // selectableRows// 👈 only show checkboxes if delete permission is true
+              // onSelectedRowsChange={({ selectedRows }) => setSelectedAuditLog(selectedRows)}
+              // selectableRowHighlight
             />
       </TableWrapper>
 
@@ -335,6 +360,12 @@ const AuditLogTable = ({data, onDeleteAudit, auditPermission}) => {
                        <InnerWrapper wd={'100%'}>
                           <span><b>Date</b></span>
                           <span>{auditDate(date)}</span>
+                       </InnerWrapper>
+                  </AnyItemContainer>
+                <AnyItemContainer>
+                       <InnerWrapper wd={'100%'}>
+                          <span><b>Time</b></span>
+                          <span>{ auditTime(date)}</span>
                        </InnerWrapper>
                   </AnyItemContainer>
               </Overlay>
