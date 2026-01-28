@@ -74,6 +74,14 @@ const paymentTypeItems =  [
         title: 'Select',
         value: ''
     },
+   {
+        title: 'ETMCS Deduction',
+        value: 'ETMCS Deduction'
+    },
+  {
+        title: 'Check',
+        value: 'Check'
+    },
     {
         title: 'Card',
         value: 'Card'
@@ -83,10 +91,6 @@ const paymentTypeItems =  [
         value: 'Cash'
     },
     {
-        title: 'Check',
-        value: 'Check'
-    },
-    {
         title: 'Online',
         value: 'Online'
     },
@@ -94,6 +98,10 @@ const paymentTypeItems =  [
         title: 'Bank Transfer',
         value: 'Bank Transfer'
     },
+    //   {
+    //     title: 'N/A',
+    //     value: 'N/A'
+    // },
 ]
 
 

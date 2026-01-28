@@ -120,6 +120,17 @@ const [prodStock, setProdStock]= useState('');
 const [taxItems, setTaxItems] = useState('')
 
 
+
+ const [noOfMonth, setNoOfMonth] = useState('')
+ const [noOfMonthError, setNoOfMonthError] = useState(false)
+ const [showNoOfMonth, setShowNoOfMonth] = useState(false)
+ 
+ const [startMonth, setStartMonth] = useState('')
+ const [startMonthError, setStartMonthError] = useState(false)
+ const [showStartMonth, setShowStartMonth] = useState(false)
+
+
+
 // navigate to add out of stock item purchaseFunc
 const navigateToAddStock = () =>{
      navigate('/add-purchase');
@@ -227,12 +238,11 @@ const handleChange = (type, e)=>{
             }else{
                 setShowPartialField(false);
             }
-
-            if(e.target.value === 'unpaid'){
-                setPaymentType(paymentTypeItems[6].value)
-            }else{
-                setPaymentType('');
-            }
+            // if(e.target.value === 'unpaid'){
+            //     setPaymentType(paymentTypeItems[6].value)
+            // }else{
+            //     setPaymentType('');
+            // }
         } else if (type === 'amount-paid') {
             const val = Number(e.target.value);
 
@@ -250,7 +260,22 @@ const handleChange = (type, e)=>{
         }else if(type === 'payment-type'){
             setPaymentType(e.target.value);
             setPaymentTypeError(false);
-        }else if(type === 'note'){
+
+             if(e.target.value === 'ETMCS Deduction'){
+                setShowNoOfMonth(true);
+                setShowStartMonth(true);
+
+            }else{
+                setShowNoOfMonth(false);
+                setShowStartMonth(false);
+            }                
+        }else if(type === 'no-of-months'){
+            setNoOfMonth(e.target.value);
+            setNoOfMonthError(false);
+        }else if(type === 'start-month'){
+            setStartMonth(e.target.value);
+            setStartMonthError(false);}
+            else if(type === 'note'){
             setNote(e.target.value);
         }
 }
@@ -277,24 +302,24 @@ const amountExceedBalanceHandler = () =>{
     setAmountPaidError(false)
 }
 
-// TextITe
-const TaxItem = [
+// MONTHS FOR THE PAYMENT
+const NoOfMonths = [
     {
         title: 'Select',
         value: ''
     },
     {
-        title: 'none',
-        value: 0
+        title: '1',
+        value: 1
     },
     {
-        title: 'Tax (5%)',
-        value: 5
+        title: '2',
+        value: 2
     },
     
     {
-        title: 'Vat + Tax (7%)',
-        value: 7
+        title: '3',
+        value: 3
     },
 
 ] 
@@ -323,6 +348,14 @@ const paymentTypeItems =  [
         title: 'Select',
         value: ''
     },
+   {
+        title: 'ETMCS Deduction',
+        value: 'ETMCS Deduction'
+    },
+  {
+        title: 'Check',
+        value: 'Check'
+    },
     {
         title: 'Card',
         value: 'Card'
@@ -332,10 +365,6 @@ const paymentTypeItems =  [
         value: 'Cash'
     },
     {
-        title: 'Check',
-        value: 'Check'
-    },
-    {
         title: 'Online',
         value: 'Online'
     },
@@ -343,10 +372,10 @@ const paymentTypeItems =  [
         title: 'Bank Transfer',
         value: 'Bank Transfer'
     },
-      {
-        title: 'N/A',
-        value: 'N/A'
-    },
+    //   {
+    //     title: 'N/A',
+    //     value: 'N/A'
+    // },
 ]
 
 const paymentStatusItems = [
@@ -368,7 +397,24 @@ const paymentStatusItems = [
     },
 ]
 
+
+
 useEffect(() => {
+    
+    const today = new Date();
+
+    // move to next month
+    const nextMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      28
+    );
+
+    // format YYYY-MM-DD
+    const formattedDate = nextMonth.toISOString().split('T')[0];
+
+    setStartMonth(formattedDate);
+
     const handleClickOutside = (e) => {
         if (
             productDropdownRef.current &&
@@ -802,7 +848,20 @@ if (itemList.length === 0) {
     isValid = false;
    }
 }
-    
+
+ if (paymentType === 'ETMCS Deduction') {
+    if(!noOfMonth){
+            setNoOfMonthError(true)
+            isValid = false;
+        }
+
+    if(!startMonth){
+            setStartMonthError(true)
+            isValid = false;
+        }
+  }
+
+
     if(isValid){
       
     const newSale = {
@@ -815,6 +874,8 @@ if (itemList.length === 0) {
       saleAmount: Number(saleAmount),
       paymentStatus,
       paymentType,
+      noOfMonth: Number(noOfMonth) || '',
+      startMonth,
       amountPaid: Number(amountPaid),
       dueBalance,
       note,
@@ -1327,7 +1388,28 @@ if (itemList.length === 0) {
                                 title={'Payment Type'}
                                 onChange={(e)=>handleChange('payment-type', e)}
                      />
+                    
+        {    showNoOfMonth     &&    
+                <SelectInput 
+                                                options={NoOfMonths} 
+                                                label={'No. of Months'}
+                                                value={noOfMonth}
+                                                error={noOfMonthError}
+                                                requiredSymbol={'*'}
+                                                title={'No. of Months'}
+                                                onChange={(e)=>handleChange('no-of-months', e)}
+                                    />}
 
+           {   showStartMonth &&           <Input 
+                                value={startMonth} 
+                                title={'Start Month'}
+                                onChange={(e)=>handleChange('start-month', e)} 
+                                type={'date'} 
+                                label={'Date'} 
+                                error={startMonthError}
+                                requiredSymbol={'*'}
+                            /> 
+}
                     <TextArea 
                                 label={'Note'} 
                                 title={'Note'} 

@@ -16,6 +16,8 @@ exports.saleRegister = async (req, res) => {
       saleAmount,
       paymentType,
       paymentStatus,
+      noOfMonth,
+      startMonth,
       amountPaid,
       dueBalance,
       note,
@@ -100,6 +102,8 @@ exports.saleRegister = async (req, res) => {
       saleAmount,
       paymentType,
       paymentStatus,
+      noOfMonth,
+      startMonth,
       amountPaid,
       dueBalance,
       note,
@@ -180,7 +184,7 @@ exports.saleRegister = async (req, res) => {
             stockQuantity: -item.quantity,
           },
         },
-        { new: true }
+        { new: true },
       );
 
       if (!update) {
@@ -190,185 +194,7 @@ exports.saleRegister = async (req, res) => {
       }
     }
 
-    // ================================
-    // SUCCESS
-    // ================================
-    res.status(200).json({
-      message: "Sale saved successfully",
-      sale: newSale,
-    });
-  } catch (error) {
-    console.error("Sale Register Error:", error);
-    res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
-
-exports.saleRegister1 = async (req, res) => {
-  try {
-    const {
-      saleDate,
-      customer,
-      saleStatus,
-      walkingCustomerEmail,
-      walkingCustomerNumber,
-      saleAmount,
-      paymentType,
-      paymentStatus,
-      amountPaid,
-      dueBalance,
-      note,
-      subTotal,
-      otherCharges,
-      discount,
-      discountValue,
-      shipping,
-      saleItems = [],
-      prefix,
-      userId,
-    } = req.body;
-
-    // Prevent saving sale with no items
-    if (!saleItems || saleItems.length === 0) {
-      return res.status(400).json({
-        message: "Sale items cannot be empty.",
-      });
-    }
-
-    // ================================
-    // 1. GENERATE SALE CODE
-    // ================================
-    const lastSale = await Sale.findOne({
-      code: { $regex: `^${prefix}` },
-    })
-      .sort({ code: -1 })
-      .exec();
-
-    let lastSerial = 0;
-    if (lastSale && lastSale.code) {
-      const match = lastSale.code.match(/\d+$/);
-      if (match) lastSerial = parseInt(match[0], 10);
-    }
-
-    const serial = (lastSerial + 1).toString().padStart(4, "0");
-    const code = `${prefix}${serial}`;
-
-    // FORMAT ITEMS
-    const cleanedItems = saleItems.map((item) => ({
-      productId: item.productId,
-      title: item.title,
-      quantity: Number(item.quantity),
-      price: Number(item.price),
-      tax: Number(item.tax),
-      taxAmount: Number(item.taxAmount),
-      unitCost: Number(item.unitCost),
-      amount: Number(item.amount),
-    }));
-
-    // ================================
-    // 2. CHECK STOCK FOR ALL PRODUCTS (SAFE)
-    // ================================
-    for (const item of cleanedItems) {
-      const product = await Product.findById(item.productId);
-
-      if (!product) {
-        return res.status(400).json({
-          message: `Product not found: ${item.title}`,
-        });
-      }
-
-      if (product.stockQuantity < item.quantity) {
-        return res.status(400).json({
-          message: `Not enough stock for product: ${item.title}`,
-        });
-      }
-    }
-
-    // ================================
-    // 3. CREATE THE SALE NOW
-    // ================================
-    const newSale = new Sale({
-      code,
-      saleDate,
-      customer,
-      saleStatus,
-      walkingCustomerEmail,
-      walkingCustomerNumber,
-      saleAmount,
-      paymentType,
-      paymentStatus,
-      amountPaid,
-      dueBalance,
-      note,
-      subTotal,
-      otherCharges,
-      discount,
-      discountValue,
-      shipping,
-      userId,
-      saleItems: cleanedItems,
-    });
-
-    // PAYMENT LOGIC
-    if (paymentStatus === "unpaid") {
-      newSale.amountPaid = 0;
-      newSale.dueBalance = newSale.saleAmount;
-    } else if (paymentStatus === "paid") {
-      newSale.amountPaid = newSale.saleAmount;
-      newSale.dueBalance = 0;
-    } else if (paymentStatus === "partial") {
-      if (!amountPaid || amountPaid <= 0) {
-        newSale.amountPaid = 0;
-        newSale.dueBalance = newSale.saleAmount;
-      } else {
-        newSale.dueBalance = newSale.saleAmount - newSale.amountPaid;
-      }
-    }
-
-    await newSale.save();
-
-    // ================================
-    // 4. SAVE PAYMENT RECORD IF NEEDED
-    // ================================
-    if (paymentStatus === "paid" || paymentStatus === "partial") {
-      await Payment.create({
-        paymentDate: saleDate, // value from saleDate
-        paymentFor: code, // sale code (e.g. SA0001)
-        invoiceNo: code, // same as paymentFor
-        dueBalance: newSale.dueBalance, // remaining balance
-        payableAmount: newSale.amountPaid, // how much was paid NOW
-        paymentType: paymentType, // cash/card/online etc.
-        note,
-        userId,
-      });
-    }
-
-    // ================================
-    // 5. ATOMIC STOCK UPDATE PER ITEM
-    // ================================
-    for (const item of cleanedItems) {
-      const update = await Product.findOneAndUpdate(
-        {
-          _id: item.productId,
-          stockQuantity: { $gte: item.quantity }, // prevent negative stock
-        },
-        {
-          $inc: {
-            saleQuantity: item.quantity,
-            stockQuantity: -item.quantity,
-          },
-        },
-        { new: true }
-      );
-
-      if (!update) {
-        return res.status(400).json({
-          message: `Not enough stock for product: ${item.title}`,
-        });
-      }
-    }
+    console.log(newSale);
     // ================================
     // SUCCESS
     // ================================
@@ -550,6 +376,8 @@ exports.saleUpdate = async (req, res) => {
       saleAmount,
       paymentType,
       paymentStatus,
+      noOfMonth,
+      startMonth,
       amountPaid,
       dueBalance,
       note,
@@ -595,7 +423,7 @@ exports.saleUpdate = async (req, res) => {
             stockQuantity: item.quantity,
           },
         },
-        { new: true }
+        { new: true },
       );
     }
 
@@ -644,6 +472,8 @@ exports.saleUpdate = async (req, res) => {
       saleAmount,
       paymentType,
       paymentStatus,
+      noOfMonth,
+      startMonth,
       amountPaid,
       dueBalance,
       note,
@@ -763,7 +593,7 @@ exports.saleUpdate = async (req, res) => {
             stockQuantity: -item.quantity,
           },
         },
-        { new: true }
+        { new: true },
       );
 
       if (!stockUpdate) {
@@ -814,7 +644,7 @@ exports.deleteSale = async (req, res) => {
             stockQuantity: item.quantity,
           },
         },
-        { session }
+        { session },
       );
     }
 
@@ -882,7 +712,7 @@ exports.bulkDeleteSale = async (req, res) => {
               stockQuantity: item.quantity,
             },
           },
-          { session }
+          { session },
         );
       }
 
@@ -896,52 +726,6 @@ exports.bulkDeleteSale = async (req, res) => {
         oldData: oldSaleData,
         newData: null,
       });
-    }
-
-    // 2️⃣ Delete all related sales returns
-    await SalesReturn.deleteMany({ sale: { $in: ids } }, { session });
-
-    // 3️⃣ Delete sales
-    await Sale.deleteMany({ _id: { $in: ids } }, { session });
-
-    await session.commitTransaction();
-    session.endSession();
-
-    res.status(200).json({
-      message:
-        "Selected sales, related returns deleted, and stock reversed successfully",
-    });
-  } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error("Error bulk deleting sales:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-exports.bulkDeleteSale1 = async (req, res) => {
-  const { ids } = req.body; // array of sale IDs
-
-  const session = await Sale.startSession();
-  session.startTransaction();
-
-  try {
-    const sales = await Sale.find({ _id: { $in: ids } }).session(session);
-
-    for (const sale of sales) {
-      // 1️⃣ Rollback Product stock & sale quantity
-      for (const item of sale.saleItems) {
-        await Product.findByIdAndUpdate(
-          item.productId,
-          {
-            $inc: {
-              saleQuantity: -item.quantity,
-              stockQuantity: item.quantity,
-            },
-          },
-          { session }
-        );
-      }
     }
 
     // 2️⃣ Delete all related sales returns
@@ -1001,7 +785,7 @@ exports.getTotalSaleAmount = async (req, res) => {
     console.error(
       "Error getting total sale amount:",
       error.message,
-      error.stack
+      error.stack,
     );
     res
       .status(500)

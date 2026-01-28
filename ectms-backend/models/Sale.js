@@ -81,6 +81,17 @@ const SaleSchema = new mongoose.Schema(
       enum: ["unpaid", "partial", "paid"],
       default: "unpaid",
     },
+
+    noOfMonth: {
+      type: Number,
+      required: false,
+    },
+
+    startMonth: {
+      type: Date,
+      required: false,
+    },
+
     amountPaid: {
       type: Number,
       default: 0,
@@ -123,7 +134,7 @@ const SaleSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

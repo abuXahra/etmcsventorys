@@ -305,12 +305,32 @@ const token = localStorage.getItem('token');
                                               <TdStyled><b>Date</b></TdStyled>
                                               <TdStyled><b>Amount </b></TdStyled>
                                               <TdStyled><b>Payment Type</b></TdStyled>
+                                              {saleData?.paymentType === 'ETMCS Deduction' &&  
+                                               ( <TdStyled><b>Months</b></TdStyled> )
+                                              }
+                                            {saleData?.paymentType === 'ETMCS Deduction' &&  
+                                               ( <TdStyled><b>Starting</b></TdStyled> )
+                                              }
+
+                                            {saleData?.paymentType === 'ETMCS Deduction' &&  
+                                               ( <TdStyled><b>Monthly Deduction</b></TdStyled> )
+                                              }
                                           </thead>
                                           <tbody>
                                                  <tr>
                                                       <TdStyled>{new Date(saleData?.saleDate).toDateString()}</TdStyled>
                                                       <TdStyled>{saleData?.saleAmount}</TdStyled>
                                                       <TdStyled>{saleData?.paymentType}</TdStyled>
+                                                       {saleData?.paymentType === 'ETMCS Deduction' &&  
+                                                        ( <TdStyled>{saleData?.noOfMonth}</TdStyled> )
+                                                        }
+                                                      {saleData?.paymentType === 'ETMCS Deduction' &&  
+                                                        ( <TdStyled>{new Date(saleData?.startMonth).toDateString()}</TdStyled> )
+                                                        }
+
+                                                      {saleData?.paymentType === 'ETMCS Deduction' &&  
+                                                        ( <TdStyled>{saleData?.saleAmount / saleData?.noOfMonth}</TdStyled> )
+                                                        }
                                                   </tr>
                                           </tbody>
                                       </TableStyled>
