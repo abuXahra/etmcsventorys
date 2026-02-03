@@ -160,8 +160,17 @@ const token = localStorage.getItem('token');
       const imgY = 30;
       pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio );
       // pdf.save('invoice.pdf')
+         // ✅ SAFE FILE NAME
+    const customerName = customerData?.name
+      ?.replace(/\s+/g, '_')        // replace spaces
+      ?.replace(/[^\w-]/g, '');     // remove special chars
+
+    const saleCode = saleData?.code;
+
+    
        // 🔽 Use sale code in file name
-      pdf.save(`Sale_${saleData?.code || 'invoice'}.pdf`);
+      // pdf.save(`Sale_${saleData?.code || 'invoice'}.pdf`);
+      pdf.save(`Sale_${customerName}_${saleCode}.pdf`);
       setIsBtnLoading(false);
     })
   }

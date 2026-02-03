@@ -158,8 +158,18 @@ const token = localStorage.getItem('token');
       const imgX = (pdfWidth - imgWidth * ratio) / 2;
       const imgY = 30;
       pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio );
+
+       // ✅ SAFE FILE NAME
+    const supplierName = supplierData?.name
+      ?.replace(/\s+/g, '_')        // replace spaces
+      ?.replace(/[^\w-]/g, '');     // remove special chars
+
+    const purchaseCode = purchaseData?.code;
+
+    pdf.save(`Purchase_${supplierName}_${purchaseCode}.pdf`);
+
       // pdf.save('invoice.pdf')
-      pdf.save(`Purchase_${purchaseData?.code || 'invoice'}.pdf`);
+      pdf.save(`Purchase${supplierName}_${purchaseCode} || 'invoice'}.pdf`);
       setIsBtnLoading(false);
     })
   }
