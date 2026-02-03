@@ -151,7 +151,7 @@ const ProductTable = ({ data, onDeleteProd, currencySymbol, show = true, product
     {
       name: 'Unit',
       selector: (row) => (row.isTotal ? '' : row.unit?.title),
-      width: '10%',
+      width: '9%',
     },
     {
       name: 'Purchase',
