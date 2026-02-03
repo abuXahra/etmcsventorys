@@ -131,7 +131,7 @@ exports.fetchProductReport = async (req, res) => {
     const products = await Product.find()
       .populate({ path: "unit", select: "title" })
       .populate({ path: "category", select: "title" })
-      .sort({ stockQuantity: 1 })
+      // .sort({ stockQuantity: -1 })
       .lean();
     res.status(200).json(products);
   } catch (err) {
@@ -169,7 +169,7 @@ exports.updateProducts = async (req, res) => {
     const productUpdate = await Product.findByIdAndUpdate(
       req.params.productId,
       { $set: req.body },
-      { new: true }
+      { new: true },
     );
 
     // Activity log
@@ -262,8 +262,8 @@ exports.bulkDeleteProducts = async (req, res) => {
             code: product.code,
             status: "",
           },
-        })
-      )
+        }),
+      ),
     );
 
     res.status(200).json({
