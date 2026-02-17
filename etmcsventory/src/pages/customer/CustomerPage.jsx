@@ -82,19 +82,25 @@ export default function CustomerPage() {
             
     
                 // handle search query
-                const handleSearchQueryOnChange = (e) => {
-                  let query = e.target.value;
-                  //  if query is empty, reset to all record
-                  if(query === ''){
-                    setCustomer(allCustomer);
-                  }else{
-                    // Filter records based on query
-                    const filterRecords = allCustomer.filter(item =>
-                      item.username.toLocaleLowerCase().includes(query.toLocaleLowerCase())
-                    );
-                    setCustomer(filterRecords)
-                  }
-                }
+const handleSearchQueryOnChange = (e) => {
+  const query = e.target.value.toLowerCase().trim();
+
+  // If query is empty, reset list
+  if (!query) {
+    setCustomer(allCustomer);
+    return;
+  }
+
+  const filterRecords = allCustomer.filter((item) =>
+    item.code?.toString().toLowerCase().includes(query) ||
+    item.name?.toLowerCase().includes(query) ||
+    item.email?.toLowerCase().includes(query) ||
+    item.phoneNumber?.toString().toLowerCase().includes(query)
+  );
+
+  setCustomer(filterRecords);
+};
+
       
   
   const navigate = useNavigate();

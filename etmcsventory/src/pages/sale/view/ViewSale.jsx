@@ -123,7 +123,7 @@ export default function ViewSale() {
 
     } catch (error) {
       console.log(error);
-      // setIsLoading(false);;
+      // setIsLoading(false);;git
     }
 
   }
