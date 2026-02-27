@@ -6,7 +6,7 @@ import CompanyLogo from '../../../images/product_placeholder.jpg'
 import { SiPantheon } from 'react-icons/si'
 import { ProductItemList } from '../../../data/productItems'
 import Button from '../../../components/clicks/button/Button'
-import { FaEdit, FaPrint } from 'react-icons/fa'
+import { FaEdit, FaPlus, FaPrint } from 'react-icons/fa'
 import { FaDownload } from 'react-icons/fa6'
 import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
@@ -586,6 +586,18 @@ export default function ViewSale() {
                   btnBdRd={'2px'}
                   btnOnClick={()=>{}}
                 /> */}
+
+                
+              {/* print */}
+              <Button
+                btnColor={'rgb(35, 139, 0)'}
+                btnText={'Add Sale'}
+                btnPd={'5px 10px'}
+                btnFontSize={'12px'}
+                btnLeftIcon={<FaPlus />}
+                btnBdRd={'2px'}
+                btnOnClick={() => navigate('/add-sale')}
+              />
             </ButtonsWrapper>
           </ViewSalesContent>
         }

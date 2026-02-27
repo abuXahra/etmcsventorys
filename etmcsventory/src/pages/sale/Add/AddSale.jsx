@@ -1015,7 +1015,7 @@ if (itemList.length === 0) {
                                 title={'Quantity'}
                                 onChange={(e)=>handleChange('quantity', e)} 
                                 error={quantityError} 
-                                type={'text'} 
+                                type={'number'} 
                                 label={'Quantity'} 
                                 requiredSymbol={'*'}
                             />                  
