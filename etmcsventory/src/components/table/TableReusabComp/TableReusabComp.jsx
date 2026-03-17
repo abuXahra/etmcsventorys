@@ -112,15 +112,15 @@ const TabeReusabComp = ({ data }) => {
       sortable: false,
       // width: '10%',
     },
-    {
-      name: 'Amount',
-      selector: (row) =><div>
-         <span dangerouslySetInnerHTML={{ __html: currencySymbol }}/>{row.salePrice *  row.stockQuantity}
-       </div>,
-      sortable: false,        
-      // width: '10%', // Set a different width
+    // {
+    //   name: 'Amount',
+    //   selector: (row) =><div>
+    //      <span dangerouslySetInnerHTML={{ __html: currencySymbol }}/>{row.salePrice *  row.stockQuantity}
+    //    </div>,
+    //   sortable: false,        
+    //   // width: '10%', // Set a different width
 
-    },
+    // },
     
   ];
 
