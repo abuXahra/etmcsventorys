@@ -423,7 +423,8 @@ const paymentTypeItems =  [
               </ItemContainer>
 
               {/* Payment History */}
- { paymentHistory.length > 0 ?              <ItemContainer title={'Payment History'}>
+ { paymentHistory.length >= 0 ?              
+ <ItemContainer title={'Payment History'}>
 
               <div className="payment-history">
 
