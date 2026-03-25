@@ -111,7 +111,7 @@ export default function Register() {
         </RegisterContentLeft>
        <FormWrapper>
         <img src={RegisterIcon} alt="" srcset="" />
-         <h1>EtmcsVentory</h1>
+         <h1>EtmcVentory</h1>
          <p>Please login to your account</p>
         <form onSubmit={onSubmitHandler}>
              <Input
