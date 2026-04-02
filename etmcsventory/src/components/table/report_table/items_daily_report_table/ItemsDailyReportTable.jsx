@@ -121,8 +121,8 @@ const ItemsDailyReportTable = ({ data, currencySymbol }) => {
           data={combinedData}
           responsive
           pagination
-          paginationPerPage={50}
-          paginationRowsPerPageOptions={[10, 25, 50, 100]}
+          paginationPerPage={100}
+          paginationRowsPerPageOptions={[10, 25, 50, 100, 200, 300, 400, 500]}
           customStyles={customStyles}
           highlightOnHover
         />

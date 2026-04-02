@@ -17,6 +17,8 @@ import { TopCard, TopCardContent, TopCardContentWrapper, TopCardIcon } from '../
 import { TopCardItemList } from '../../../data/TopcardItems'
 import { UserContext } from '../../../components/context/UserContext'
 import ReactPlayer from "react-player";
+import ProductCustomerTable from '../../../components/table/product_table/product_customers_table/ProductCustomerTable'
+import ProductSupplierTable from '../../../components/table/product_table/product_suppliers_table/ProductSupplierTable'
 
 
 export default function ProductDetail() {
@@ -26,12 +28,14 @@ export default function ProductDetail() {
     const {productId} = useParams();
     const [prodData, setProdData] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isBtnLoading, setIsBtnLoading] = useState(false);
+    const [isBtnLoading, setIsBtnLoading] = useState(false);      
     const [showDeleteCard, setShowDeleteCard] = useState(false);
     const [grabId, setGrabId] = useState('');
     const [grabTitle, setGrabTitle] = useState('');
     const [showProdImage, setShowProdImage] = useState(false);
     const [companyData, setCompanyData] = useState('')
+    const [productCustomers, setProductCustomers] = useState([]);
+    const [productSuppliers, setProductSuppliers] = useState([]);
     
     let totalProdSale = (prodData?.saleQuantity) * (prodData?.salePrice)
     let totalProdPurchase = (prodData?.purchaseQuantity) * (prodData?.purchasePrice)
@@ -46,7 +50,9 @@ export default function ProductDetail() {
       const canEdit = isAdmin || customerPermission?.canEdit
       const canDelete = isAdmin || customerPermission?.canDelete
     
-    
+      const[showSalesBreakdown, setShowSalesBreakdown] = useState(false);
+      const[showPurchaseBreakdown, setShowPurchaseBreakdown] = useState(false);
+
     
       // Fetch product detail
               useEffect(()=>{
@@ -87,6 +93,46 @@ export default function ProductDetail() {
                                 
                                   }
                                   fetchCompany();
+
+// fetch products customers
+                  const fetchProductCustomers = async() =>{
+                                    // setIsLoading(true)
+                                      try {
+                                          const res = await axios.get(`${process.env.REACT_APP_URL}/api/sale/product/${productId}`, {
+                                          headers: {
+                                            Authorization: `Bearer ${token}`
+                                          }
+                                        } );
+                                      setProductCustomers(res.data.data)
+                                      console.log(' ===//// ==== Product Customers: \n', res.data)
+                                          // setIsLoading(false);
+                                      } catch (error) {
+                                          console.log(error);
+                                          // setIsLoading(false);
+                                      }
+                                
+                                  }
+                                  fetchProductCustomers();
+                                  
+                  // fetch products supliers
+                  const fetchProductSuppliers = async() =>{
+                                    // setIsLoading(true)
+                                      try {
+                                          const res = await axios.get(`${process.env.REACT_APP_URL}/api/purchase/product/${productId}`, {
+                                          headers: {
+                                            Authorization: `Bearer ${token}`
+                                          }
+                                        } );
+                                      setProductSuppliers(res.data.data)
+                                      console.log(' ===//// ==== Product Suppliers: \n', res.data)
+                                          // setIsLoading(false);
+                                      } catch (error) {
+                                          console.log(error);
+                                          // setIsLoading(false);
+                                      }
+                                
+                                  }
+                                  fetchProductSuppliers();
               },[productId])
     
           
@@ -342,10 +388,21 @@ function VideoPlayer({ url }) {
                        </InnerWrapper>
                   </AnyItemContainer>
                 </ItemContainer>
+
+
             </ProductDetailData>
 
             <ProductDetailPicture>
-          <ItemContainer title={'Total Summary'}> 
+              
+                <ItemContainer title={'Product Picture'}> 
+                  <PictureWrapper onClick={()=>setShowProdImage(true)} heights={'300px'} imgUrl={imgSrc}></PictureWrapper>          
+              </ItemContainer>
+
+{
+            prodData.videoUrl && (<VideoPlayer url ={prodData.videoUrl}/>)
+}
+          <ItemContainer title={'Summary'}> 
+            
          {     netProfit > 0 &&
              <AnyItemContainer>
                        <InnerWrapper wd={'100%'}>
@@ -377,15 +434,20 @@ function VideoPlayer({ url }) {
                     
                 </ItemContainer>
 
-                <ItemContainer title={'Product Picture'}> 
-                  <PictureWrapper onClick={()=>setShowProdImage(true)} heights={'300px'} imgUrl={imgSrc}></PictureWrapper>          
+              <ItemContainer title={'Breakdown'}> 
+                  <AnyItemContainer gap="60px">
+                    <InnerWrapper wd={'100%'}>
+                      <span onClick={()=>setShowSalesBreakdown(true)} style={{color: "green", cursor: "pointer"}}><b>Sales Breakdown</b></span>
+                      <span onClick={()=>setShowSalesBreakdown(true)} style={{color: "green", cursor: "pointer"}}><FaList/></span>
+                    </InnerWrapper>
+                </AnyItemContainer>
+                <AnyItemContainer gap="60px">
+                    <InnerWrapper wd={'100%'}>
+                      <span onClick={()=>setShowPurchaseBreakdown(true)} style={{color: "blue", cursor: "pointer"}}><b>Purchase Breakdown</b></span>
+                      <span onClick={()=>setShowPurchaseBreakdown(true)} style={{color: "blue", cursor: "pointer"}}><FaList/></span>
+                    </InnerWrapper>
+                </AnyItemContainer>
               </ItemContainer>
-
-{
-            prodData.videoUrl && (<VideoPlayer url ={prodData.videoUrl}/>)
-}
-
-
 
 
               <ItemContainer title={'Action'}> 
@@ -408,12 +470,42 @@ function VideoPlayer({ url }) {
                       </InnerWrapper>
                 </AnyItemContainer>}
               </ItemContainer>
+
+
             </ProductDetailPicture>
           </ProductDetailContent> 
           </div>
           }
           </>
 
+              {/* product sales detail overlay popup */}
+              {showSalesBreakdown &&
+                    <Overlay 
+                         contentWidth={'80%'}
+                         overlayButtonClick={()=>setShowSalesBreakdown(false)}
+                         closeOverlayOnClick={()=>setShowSalesBreakdown(false)}
+                         btnText1={'Ok'}
+                         btnText2={'Close'}
+                         >
+                        <ItemContainer title={prodData.title && ' Sale\'s Breakdown for ' + prodData.title }>
+                            <ProductCustomerTable data={productCustomers} />
+                        </ItemContainer>
+                    </Overlay>
+}    
+
+              {showPurchaseBreakdown &&
+                    <Overlay 
+                         contentWidth={'80%'}
+                         overlayButtonClick={()=>setShowPurchaseBreakdown(false)}
+                         closeOverlayOnClick={()=>setShowPurchaseBreakdown(false)}
+                         btnText1={'Ok'}
+                         btnText2={'Close'}
+                         >
+                        <ItemContainer title={prodData.title && ' Purchase\'s Breakdown for ' + prodData.title }>
+                            <ProductSupplierTable data={productSuppliers} />
+                        </ItemContainer>
+                    </Overlay>
+}    
 
               {/* overlay popup */}
                         { showDeleteCard &&

@@ -37,6 +37,12 @@ router.get(
 
 // fetch router
 router.get(
+  "/product/:productId",
+  verifyToken,
+  saleController.getProductCustomers,
+);
+
+router.get(
   "/:saleId",
   verifyToken,
   checkPermission("Sale", "canView"),
@@ -68,6 +74,7 @@ router.get(
   verifyToken,
   saleController.getCustomerOutstandingSales,
 );
+
 // // fetch router
 // router.get(
 //   "/:saleId",

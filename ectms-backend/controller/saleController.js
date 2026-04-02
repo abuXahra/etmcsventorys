@@ -852,3 +852,81 @@ exports.getTotalOutstandingSales = async (req, res) => {
     });
   }
 };
+
+//fetch product sale customers
+exports.getProductCustomers = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const result = await Sale.aggregate([
+      // 1. Break saleItems array
+      { $unwind: "$saleItems" },
+
+      // 2. Match product
+      {
+        $match: {
+          "saleItems.productId": new mongoose.Types.ObjectId(productId),
+        },
+      },
+
+      // 3. Join customer
+      {
+        $lookup: {
+          from: "customers",
+          localField: "customer",
+          foreignField: "_id",
+          as: "customer",
+        },
+      },
+      { $unwind: "$customer" },
+
+      // 4. Group by customer + product
+      {
+        $group: {
+          _id: {
+            customerId: "$customer._id",
+            productId: "$saleItems.productId",
+          },
+
+          customerName: { $first: "$customer.name" },
+          productName: { $first: "$saleItems.title" },
+
+          totalQuantity: { $sum: "$saleItems.quantity" },
+
+          unitPrice: { $avg: "$saleItems.price" },
+
+          totalAmount: { $sum: "$saleItems.amount" },
+
+          lastSaleDate: { $max: "$saleDate" }, // ✅ ADDED
+        },
+      },
+
+      // 5. Format output
+      {
+        $project: {
+          _id: 0,
+          customer: "$customerName",
+          productName: 1,
+          quantity: "$totalQuantity",
+          unitPrice: { $round: ["$unitPrice", 2] },
+          amount: "$totalAmount",
+          lastSaleDate: 1, // ✅ ADDED
+        },
+      },
+
+      // Optional: sort
+      { $sort: { customer: 1 } },
+    ]);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching product customers",
+    });
+  }
+};

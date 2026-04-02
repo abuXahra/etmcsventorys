@@ -122,7 +122,7 @@ exports.purchaseRegister = async (req, res) => {
             stockQuantity: item.quantity,
           },
         },
-        { new: true }
+        { new: true },
       );
     }
 
@@ -367,7 +367,7 @@ exports.purchaseUpdate = async (req, res) => {
             stockQuantity: -item.quantity,
           },
         },
-        { new: true }
+        { new: true },
       );
     }
 
@@ -474,7 +474,7 @@ exports.purchaseUpdate = async (req, res) => {
     const updatedPurchase = await Purchase.findByIdAndUpdate(
       purchaseId,
       updateData,
-      { new: true }
+      { new: true },
     );
 
     // Apply new stock
@@ -489,7 +489,7 @@ exports.purchaseUpdate = async (req, res) => {
             stockQuantity: item.quantity,
           },
         },
-        { new: true }
+        { new: true },
       );
     }
 
@@ -545,7 +545,7 @@ exports.deletePurchase = async (req, res) => {
             stockQuantity: +waste.quantity,
           },
         },
-        { session }
+        { session },
       );
     }
 
@@ -565,7 +565,7 @@ exports.deletePurchase = async (req, res) => {
             stockQuantity: -item.quantity,
           },
         },
-        { session }
+        { session },
       );
     }
 
@@ -614,7 +614,7 @@ exports.bulkDeletePurchase = async (req, res) => {
     }
 
     const purchases = await Purchase.find({ _id: { $in: ids } }).session(
-      session
+      session,
     );
 
     for (const purchase of purchases) {
@@ -635,7 +635,7 @@ exports.bulkDeletePurchase = async (req, res) => {
               stockQuantity: +waste.quantity,
             },
           },
-          { session }
+          { session },
         );
       }
 
@@ -655,7 +655,7 @@ exports.bulkDeletePurchase = async (req, res) => {
               stockQuantity: -item.quantity,
             },
           },
-          { session }
+          { session },
         );
       }
 
@@ -712,7 +712,7 @@ exports.getTotalPurchaseAmount = async (req, res) => {
     console.error(
       "Error getting total Purchase amount:",
       error.message,
-      error.stack
+      error.stack,
     );
     res
       .status(500)
@@ -749,6 +749,84 @@ exports.getTotalOutstandingPurchasePayment = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error",
+    });
+  }
+};
+
+//fetch product purchase supppliers
+exports.getProductSuppliers = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const result = await Purchase.aggregate([
+      // 1. Break purchaseItems array
+      { $unwind: "$purchaseItems" },
+
+      // 2. Match product
+      {
+        $match: {
+          "purchaseItems.productId": new mongoose.Types.ObjectId(productId),
+        },
+      },
+
+      // 3. Join customer
+      {
+        $lookup: {
+          from: "suppliers",
+          localField: "supplier",
+          foreignField: "_id",
+          as: "supplier",
+        },
+      },
+      { $unwind: "$supplier" },
+
+      // 4. Group by supplier + product
+      {
+        $group: {
+          _id: {
+            supplierId: "$supplier._id",
+            productId: "$purchaseItems.productId",
+          },
+
+          supplierName: { $first: "$supplier.name" },
+          productName: { $first: "$purchaseItems.title" },
+
+          totalQuantity: { $sum: "$purchaseItems.quantity" },
+
+          unitPrice: { $avg: "$purchaseItems.price" },
+
+          totalAmount: { $sum: "$purchaseItems.amount" },
+
+          lastPurchaseDate: { $max: "$purchaseDate" }, // ✅ ADDED
+        },
+      },
+
+      // 5. Format output
+      {
+        $project: {
+          _id: 0,
+          supplier: "$supplierName",
+          productName: 1,
+          quantity: "$totalQuantity",
+          unitPrice: { $round: ["$unitPrice", 2] },
+          amount: "$totalAmount",
+          lastPurchaseDate: 1, // ✅ ADDED
+        },
+      },
+
+      // Optional: sort
+      { $sort: { supplier: 1 } },
+    ]);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching product suppliers",
     });
   }
 };

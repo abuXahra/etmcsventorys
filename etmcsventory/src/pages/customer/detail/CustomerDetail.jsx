@@ -426,7 +426,7 @@ const paymentTypeItems =  [
  { paymentHistory.length >= 0 ?              
  <ItemContainer title={'Payment History'}>
 
-              <div className="payment-history">
+              <div>
 
                 {paymentHistory.length === 0 ? (<p>No payments found for this customer.</p>) 
                 :(<CustomerPaymentHistoryTable data={paymentHistory}/>)}

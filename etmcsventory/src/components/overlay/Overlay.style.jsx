@@ -21,6 +21,7 @@ display: flex;
 justify-content: center;
 align-items: start;  
 position: fixed; 
+z-index: 9999;
 height: 100vh; 
 width:100%; 
 top: 0px; 
@@ -65,8 +66,8 @@ export const CloseIcon = styled.div`
     display: flex;
     justify-content: flex-end;
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 15px;
+    right: 15px;
 
     span{
         cursor: pointer;
