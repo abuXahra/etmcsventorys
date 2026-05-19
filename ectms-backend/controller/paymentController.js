@@ -168,7 +168,7 @@ exports.getPurchasePayments = async (req, res) => {
   try {
     // Find all payments whose invoiceNo starts with "PU"
     const payments = await Payment.find({
-      invoiceNo: { $regex: /^PU/i },
+      invoiceNo: { $regex: /^PC/i },
     })
       .populate("userId", "name email") // Include user info
       .lean();
@@ -183,15 +183,6 @@ exports.getPurchasePayments = async (req, res) => {
 
     // Map purchase info to their respective payments
     const purchaseMap = new Map(purchases.map((p) => [p.code, p]));
-
-    // const enriched = payments.map((p) => ({
-    //   ...p,
-    //   supplier: purchaseMap.get(p.invoiceNo)?.supplier || null,
-    //   // purchaseAmount: purchaseMap.get(p.invoiceNo)?.purchaseAmount || 0,
-    //   // paymentStatus: purchaseMap.get(p.invoiceNo)?.paymentStatus || "N/A",
-    //   // dueBalance: purchaseMap.get(p.invoiceNo)?.dueBalance ?? p.dueBalance,
-    // }));
-
     const enriched = payments.map((p) => {
       const purchase = purchaseMap.get(p.invoiceNo);
 
