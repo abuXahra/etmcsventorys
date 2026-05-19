@@ -184,13 +184,36 @@ exports.getPurchasePayments = async (req, res) => {
     // Map purchase info to their respective payments
     const purchaseMap = new Map(purchases.map((p) => [p.code, p]));
 
-    const enriched = payments.map((p) => ({
-      ...p,
-      supplier: purchaseMap.get(p.invoiceNo)?.supplier || null,
-      purchaseAmount: purchaseMap.get(p.invoiceNo)?.purchaseAmount || 0,
-      paymentStatus: purchaseMap.get(p.invoiceNo)?.paymentStatus || "N/A",
-      dueBalance: purchaseMap.get(p.invoiceNo)?.dueBalance ?? p.dueBalance,
-    }));
+    // const enriched = payments.map((p) => ({
+    //   ...p,
+    //   supplier: purchaseMap.get(p.invoiceNo)?.supplier || null,
+    //   // purchaseAmount: purchaseMap.get(p.invoiceNo)?.purchaseAmount || 0,
+    //   // paymentStatus: purchaseMap.get(p.invoiceNo)?.paymentStatus || "N/A",
+    //   // dueBalance: purchaseMap.get(p.invoiceNo)?.dueBalance ?? p.dueBalance,
+    // }));
+
+    const enriched = payments.map((p) => {
+      const purchase = purchaseMap.get(p.invoiceNo);
+
+      return {
+        ...p,
+
+        // purchase info
+        purchaseDate: purchase?.purchaseDate || null,
+        purchaseAmount: purchase?.purchaseAmount || 0,
+        paymentStatus: purchase?.paymentStatus || "N/A",
+        dueBalance: purchase?.dueBalance ?? p.dueBalance,
+        paymentType: purchase?.paymentType || p.paymentType,
+
+        // supplier
+        supplier: purchase?.supplier || null,
+
+        // extra optional fields
+        purchaseStatus: purchase?.purchaseStatus || "",
+        amountPaid: purchase?.amountPaid || 0,
+        reference: purchase?.reference || "",
+      };
+    });
 
     res.status(200).json(enriched);
   } catch (error) {
