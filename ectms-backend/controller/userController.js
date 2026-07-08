@@ -12,7 +12,7 @@ exports.userUpdate = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.params.userId,
       { $set: req.body },
-      { new: true }
+      { new: true },
     );
 
     // Activity log
@@ -23,7 +23,7 @@ exports.userUpdate = async (req, res) => {
       documentId: updatedUser._id,
       description: `User "${updatedUser.username}" updated`,
       newData: {
-        title: savedSupplier.username,
+        title: updatedUser.username,
         code: "",
         status: "",
       },
